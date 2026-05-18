@@ -30,7 +30,6 @@
 </head>
 <body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col antialiased pb-20 md:pb-0">
 
-    <!-- 상단 헤더 -->
     <header class="bg-white/90 border-b border-slate-200/80 sticky top-0 z-40 shadow-sm backdrop-blur-md">
         <div class="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
             <div class="flex items-center space-x-3">
@@ -51,7 +50,6 @@
         </div>
     </header>
 
-    <!-- 공통 알림 토스트 -->
     <div id="custom-toast" class="fixed top-20 left-1/2 -translate-x-1/2 z-50 transform translate-y-[-100px] opacity-0 transition-all duration-300 pointer-events-none max-w-[90%] w-80">
         <div class="bg-slate-900/95 backdrop-blur-md text-white px-4 py-3 rounded-2xl shadow-xl flex items-center space-x-3 border border-slate-700/50">
             <i data-lucide="bell" class="w-4 h-4 text-amber-400 shrink-0"></i>
@@ -59,7 +57,6 @@
         </div>
     </div>
 
-    <!-- 앱 설치 유도 배너 -->
     <div id="install-banner" class="bg-blue-600 text-white px-4 py-2.5 text-xs font-bold flex justify-between items-center hidden">
         <span class="flex items-center gap-1.5"><i data-lucide="smartphone" class="w-4 h-4"></i>홈 화면에 추가해야 백그라운드 알람이 옵니다!</span>
         <button onclick="triggerPwaInstall()" class="bg-white text-blue-600 px-3 py-1 rounded-lg text-[10px] shadow">설치</button>
@@ -67,10 +64,8 @@
 
     <main class="flex-1 max-w-6xl w-full mx-auto p-4 grid grid-cols-1 lg:grid-cols-12 gap-6" id="touch-swipe-zone">
         
-        <!-- 좌측 패널 (알람, 설정, 필터) -->
         <div class="lg:col-span-4 space-y-5">
             
-            <!-- 알림 제어판 -->
             <div class="bg-gradient-to-br from-slate-900 to-blue-950 text-white p-5 rounded-3xl border border-slate-800 shadow-xl space-y-4">
                 <div class="flex items-center justify-between border-b border-slate-800 pb-3">
                     <div class="flex items-center space-x-2">
@@ -89,12 +84,11 @@
                     </button>
                     <button onclick="sendTestNotificationDirectly()" class="w-full py-2 bg-slate-800/80 hover:bg-slate-800 text-slate-300 border border-slate-700/60 font-semibold rounded-xl text-[10px] transition-all flex items-center justify-center space-x-1.5 tap-active">
                         <i data-lucide="smartphone" class="w-3.5 h-3.5 text-emerald-400"></i>
-                        <span>2단계: 3초 뒤 백그라운드 알림 테스트</span>
+                        <span>2단계: 3초 뒤 백그라운드 식단 알림 테스트</span>
                     </button>
                 </div>
             </div>
 
-            <!-- 캘린더 네비게이션 -->
             <div class="bg-white p-5 rounded-3xl border border-slate-200/80 shadow-sm space-y-4">
                 <div class="flex items-center justify-between">
                     <span class="text-[11px] font-extrabold text-blue-600 uppercase tracking-wider block">조회 기간 설정</span>
@@ -110,7 +104,6 @@
                 </div>
             </div>
 
-            <!-- 알레르기 안심 필터 -->
             <div class="bg-white p-5 rounded-3xl border border-slate-200/80 shadow-sm space-y-4">
                 <div class="flex items-center justify-between border-b border-slate-100 pb-3">
                     <div class="flex items-center space-x-2 text-slate-900 font-extrabold text-sm">
@@ -128,7 +121,6 @@
                 <div class="grid grid-cols-3 gap-1 pt-3 border-t border-slate-100" id="allergy-container"></div>
             </div>
 
-            <!-- 텔레메트리 (개발/로그) -->
             <div class="bg-slate-900 text-slate-300 p-4 rounded-3xl shadow-md space-y-3">
                 <div class="flex items-center justify-between border-b border-slate-800 pb-2">
                     <div class="flex items-center space-x-2">
@@ -145,10 +137,8 @@
             </div>
         </div>
 
-        <!-- 우측 패널 (메인 식단 & AI) -->
         <div class="lg:col-span-8 space-y-5">
             
-            <!-- 탭 전환 -->
             <div class="bg-white p-1.5 rounded-2xl border border-slate-200 flex space-x-1 shadow-sm">
                 <button onclick="switchTab('weekly')" id="tab-weekly" class="flex-1 py-2.5 text-xs md:text-sm font-extrabold rounded-xl bg-blue-600 text-white shadow-sm flex items-center justify-center space-x-1.5 transition-all tap-active">
                     <i data-lucide="layout-grid" class="w-4 h-4"></i><span>주간 식단표</span>
@@ -158,7 +148,6 @@
                 </button>
             </div>
 
-            <!-- 주간 식단 뷰 -->
             <div id="view-weekly" class="space-y-4">
                 <div class="flex items-center justify-between">
                     <h3 class="text-sm font-extrabold text-slate-800 flex items-center gap-1.5">
@@ -173,7 +162,6 @@
                 </div>
             </div>
 
-            <!-- 상세 AI 뷰 -->
             <div id="view-daily" class="hidden space-y-4">
                 <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                     <h3 class="text-sm font-extrabold text-slate-800 flex items-center gap-1.5">
@@ -183,10 +171,8 @@
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-12 gap-5">
-                    <!-- 상세 메뉴 및 영양 바 -->
                     <div class="md:col-span-7 bg-white rounded-3xl border border-slate-200/80 p-6 shadow-sm flex flex-col justify-between" id="daily-detail-card"></div>
 
-                    <!-- AI 비서 봇 -->
                     <div class="md:col-span-5 bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 text-white rounded-3xl p-6 shadow-md flex flex-col justify-between relative overflow-hidden">
                         <div class="absolute -right-10 -bottom-10 opacity-5 pointer-events-none"><i data-lucide="brain" class="w-44 h-44 text-white"></i></div>
                         <div class="relative z-10 space-y-4">
@@ -209,7 +195,6 @@
         </div>
     </main>
 
-    <!-- 모바일 하단 네비게이션 -->
     <nav class="fixed bottom-0 left-0 right-0 bg-white/95 border-t border-slate-200/80 backdrop-blur-md py-2.5 px-6 flex justify-around items-center z-40 md:hidden shadow-lg">
         <button onclick="switchTab('weekly')" class="flex flex-col items-center gap-1 text-slate-500 active:text-blue-600 transition tap-active"><i data-lucide="calendar" class="w-5 h-5"></i><span class="text-[9px] font-bold">주간급식</span></button>
         <button onclick="switchTab('daily')" class="flex flex-col items-center gap-1 text-slate-500 active:text-blue-600 transition tap-active"><i data-lucide="sparkles" class="w-5 h-5"></i><span class="text-[9px] font-bold">AI분석</span></button>
@@ -268,7 +253,7 @@
         function registerPwaAndNotificationCheck() {
             if ('serviceWorker' in navigator) {
                 navigator.serviceWorker.register('./sw.js')
-                .then(reg => { addLog("[App] 서비스 워커 엔진 활성화 완료 (./sw.js)", "success"); checkNotificationStatus(); })
+                .then(reg => { addLog("[App] 서비스 워커 엔진 활성화 완료", "success"); checkNotificationStatus(); })
                 .catch(err => { addLog(`[App] 서비스 워커 오류: ${err.message}`, "error"); });
             }
             window.addEventListener('beforeinstallprompt', (e) => {
@@ -298,19 +283,36 @@
             }
         }
 
+        // [중요 수정] 실제 선택된 날짜의 식단 정보를 알림으로 전송
         function sendTestNotificationDirectly() {
             if (Notification.permission !== 'granted') return showToast("먼저 [1단계: 알림 권한 허용하기] 버튼을 눌러주세요!");
-            showToast("3초 뒤 알림이 발송됩니다. 홈 화면으로 나가보세요!");
-            addLog("3초 뒤 백그라운드 푸시 강제 명령 예약", "info");
+            
+            // 1. 현재 화면에 띄워진 급식 데이터 가져오기
+            const mealData = scrapedMeals[currentSelectedDate];
+            let notiTitle = `🔔 성일고 급식 알람`;
+            let notiBody = "오늘의 급식 데이터가 없습니다.";
+            
+            if (mealData) {
+                // 2. 알레르기 번호 깔끔하게 지우기 (예: "찰수수밥1.2." -> "찰수수밥")
+                const cleanMenu = mealData.rawMenu.replace(/\d+\./g, '').replace(/\./g, '').trim();
+                notiTitle = `🔔 성일고 ${currentSelectedDate.substring(5)} 급식`; // 날짜 포함
+                notiBody = `오늘의 메뉴: ${cleanMenu} (${mealData.calories}kcal)\n앱을 눌러 AI 코칭을 확인하세요!`;
+            }
+
+            showToast("3초 뒤 실제 식단 알림이 발송됩니다. 홈 화면으로 나가보세요!");
+            addLog("3초 뒤 백그라운드 푸시 강제 명령 예약 (실제 식단 탑재)", "info");
+            
             setTimeout(() => {
                 navigator.serviceWorker.ready.then(reg => {
-                    reg.showNotification('🔔 성일고등학교 아침 급식 알람', {
-                        body: '오늘 점심 메뉴가 도착했습니다. 눌러서 AI 분석을 확인하세요! (840kcal)',
+                    reg.showNotification(notiTitle, {
+                        body: notiBody,
                         icon: 'https://cdn-icons-png.flaticon.com/512/3408/3408506.png',
                         badge: 'https://cdn-icons-png.flaticon.com/512/3408/3408506.png',
-                        vibrate: [200, 100, 200]
+                        vibrate: [200, 100, 200, 100, 200], // 징-징-징-
+                        requireInteraction: true,
+                        data: { url: '/' }
                     });
-                    addLog("테스트 알림 송출 명령 하달 성공", "success");
+                    addLog("실제 식단 알림 송출 완료", "success");
                 }).catch(err => addLog(`알림 에러: ${err}`, "error"));
             }, 3000);
         }
