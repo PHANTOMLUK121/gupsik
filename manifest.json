@@ -1,0 +1,17 @@
+{
+  "short_name": "성일고급식",
+  "name": "성일고등학교 스마트 AI 급식실",
+  "icons": [
+    {
+      "src": "[https://cdn-icons-png.flaticon.com/512/3408/3408506.png](https://cdn-icons-png.flaticon.com/512/3408/3408506.png)",
+      "type": "image/png",
+      "sizes": "512x512",
+      "purpose": "any maskable"
+    }
+  ],
+  "start_url": "./index.html",
+  "background_color": "#f8fafc",
+  "display": "standalone",
+  "theme_color": "#2563eb",
+  "orientation": "portrait"
+}
