@@ -6,29 +6,22 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, shrink-to-fit=no">
     <title>성일고등학교 - 스마트 AI 급식실</title>
     
-    <!-- PWA 웹앱 모바일 최적화 조건 메타 태그 -->
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="성일고급식">
     <meta name="theme-color" content="#2563eb">
     
-    <!-- Tailwind CSS & Lucide Icons -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@300;400;500;600;700;800&display=swap');
-        body { 
-            font-family: 'Pretendard', sans-serif;
-            -webkit-tap-highlight-color: transparent; 
-            user-select: none;
-        }
+        body { font-family: 'Pretendard', sans-serif; -webkit-tap-highlight-color: transparent; user-select: none; }
         .custom-scrollbar::-webkit-scrollbar { width: 4px; height: 4px; }
         .custom-scrollbar::-webkit-scrollbar-track { background: #f8fafc; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 999px; }
         .loader {
-            border: 2px solid #e2e8f0; border-radius: 50%;
-            border-top: 2px solid #2563eb; width: 16px; height: 16px;
+            border: 2px solid #e2e8f0; border-radius: 50%; border-top: 2px solid #2563eb; width: 16px; height: 16px;
             animation: spin 0.8s cubic-bezier(0.5, 0.1, 0.4, 0.9) infinite;
         }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
@@ -39,7 +32,7 @@
 
     <!-- 상단 헤더 -->
     <header class="bg-white/90 border-b border-slate-200/80 sticky top-0 z-40 shadow-sm backdrop-blur-md">
-        <div class="max-w-5xl mx-auto px-4 h-16 flex items-center justify-between">
+        <div class="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
             <div class="flex items-center space-x-3">
                 <div class="w-10 h-10 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-2xl flex items-center justify-center text-white shadow-md shadow-blue-500/20">
                     <i data-lucide="bell-ring" class="w-5 h-5 animate-pulse"></i>
@@ -47,21 +40,18 @@
                 <div>
                     <h1 class="text-base font-extrabold text-slate-900 leading-tight flex items-center gap-1.5">
                         성일고 스마트 급식실
-                        <span class="text-[9px] bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full font-bold border border-blue-200">PUSH ON</span>
+                        <span class="text-[9px] bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full font-bold border border-blue-200">PRO</span>
                     </h1>
-                    <p class="text-[10px] text-slate-400">매일 아침 7시 40분 실시간 오늘 식단 푸시 알람</p>
+                    <p class="text-[10px] text-slate-400">오프라인 캐싱, 실시간 알림 & AI 영양 코칭 탑재</p>
                 </div>
             </div>
-            
             <div id="status-indicator" class="text-xs">
-                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-500">
-                    동기화 대기중
-                </span>
+                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-500">대기중</span>
             </div>
         </div>
     </header>
 
-    <!-- 모바일 전용 토스트 알림 메시지 허브 -->
+    <!-- 공통 알림 토스트 -->
     <div id="custom-toast" class="fixed top-20 left-1/2 -translate-x-1/2 z-50 transform translate-y-[-100px] opacity-0 transition-all duration-300 pointer-events-none max-w-[90%] w-80">
         <div class="bg-slate-900/95 backdrop-blur-md text-white px-4 py-3 rounded-2xl shadow-xl flex items-center space-x-3 border border-slate-700/50">
             <i data-lucide="bell" class="w-4 h-4 text-amber-400 shrink-0"></i>
@@ -69,71 +59,54 @@
         </div>
     </div>
 
-    <!-- PWA 설치 배너 -->
+    <!-- 앱 설치 유도 배너 -->
     <div id="install-banner" class="bg-blue-600 text-white px-4 py-2.5 text-xs font-bold flex justify-between items-center hidden">
-        <span class="flex items-center gap-1.5">
-            <i data-lucide="smartphone" class="w-4 h-4"></i>
-            아이폰은 홈 화면에 추가 후 앱으로 실행해야 아침 알람이 정상 작동합니다!
-        </span>
+        <span class="flex items-center gap-1.5"><i data-lucide="smartphone" class="w-4 h-4"></i>홈 화면에 추가해야 백그라운드 알람이 옵니다!</span>
         <button onclick="triggerPwaInstall()" class="bg-white text-blue-600 px-3 py-1 rounded-lg text-[10px] shadow">설치</button>
     </div>
 
-    <main class="flex-1 max-w-5xl w-full mx-auto p-4 grid grid-cols-1 lg:grid-cols-12 gap-6" id="touch-swipe-zone">
+    <main class="flex-1 max-w-6xl w-full mx-auto p-4 grid grid-cols-1 lg:grid-cols-12 gap-6" id="touch-swipe-zone">
         
-        <!-- 왼쪽 패널: 날짜 정보, 매일 아침 알람 신청, 필터 -->
+        <!-- 좌측 패널 (알람, 설정, 필터) -->
         <div class="lg:col-span-4 space-y-5">
             
-            <!-- 🔔 매일 아침 알림 신청 세부 판넬 -->
+            <!-- 알림 제어판 -->
             <div class="bg-gradient-to-br from-slate-900 to-blue-950 text-white p-5 rounded-3xl border border-slate-800 shadow-xl space-y-4">
                 <div class="flex items-center justify-between border-b border-slate-800 pb-3">
                     <div class="flex items-center space-x-2">
-                        <div class="p-1.5 bg-blue-500/20 rounded-xl border border-blue-500/30">
-                            <i data-lucide="alarm-clock" class="w-4 h-4 text-blue-400"></i>
-                        </div>
+                        <div class="p-1.5 bg-blue-500/20 rounded-xl border border-blue-500/30"><i data-lucide="alarm-clock" class="w-4 h-4 text-blue-400"></i></div>
                         <div>
                             <h3 class="text-xs font-extrabold text-white">매일 아침 급식 알람</h3>
-                            <p class="text-[9px] text-slate-400">매 학기 아침 07:40 자동 알람 발송</p>
+                            <p class="text-[9px] text-slate-400">07:40 스마트폰 푸시 연동</p>
                         </div>
                     </div>
                     <span id="alarm-badge" class="text-[9px] bg-rose-500/20 text-rose-300 px-2 py-0.5 rounded-full font-bold border border-rose-500/30">알림 미신청</span>
                 </div>
-
-                <div class="space-y-2 text-xs text-slate-300">
-                    <p class="leading-relaxed text-[11px]">
-                        아침 알림을 활성화하면 등교 전 오늘 나올 성일고 급식의 메뉴 목록과 칼로리를 폰 상단 알림바로 매일 정기 수령합니다.
-                    </p>
-                </div>
-
                 <div class="space-y-2 pt-2">
                     <button onclick="requestNotificationPermission()" class="w-full py-2.5 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-xl text-xs transition-all flex items-center justify-center space-x-2 shadow-lg shadow-blue-500/20 tap-active">
                         <i data-lucide="bell" class="w-4 h-4"></i>
-                        <span>매일 아침 알림 활성화하기</span>
+                        <span>1단계: 알림 권한 허용하기</span>
                     </button>
-                    
-                    <button onclick="sendTestNotification()" class="w-full py-2 bg-slate-800/80 hover:bg-slate-800 text-slate-300 border border-slate-700/60 font-semibold rounded-xl text-[10px] transition-all flex items-center justify-center space-x-1.5 tap-active">
+                    <button onclick="sendTestNotificationDirectly()" class="w-full py-2 bg-slate-800/80 hover:bg-slate-800 text-slate-300 border border-slate-700/60 font-semibold rounded-xl text-[10px] transition-all flex items-center justify-center space-x-1.5 tap-active">
                         <i data-lucide="smartphone" class="w-3.5 h-3.5 text-emerald-400"></i>
-                        <span>지금 3초 뒤 가상 알림 테스트 발송</span>
+                        <span>2단계: 3초 뒤 백그라운드 알림 테스트</span>
                     </button>
                 </div>
             </div>
 
-            <!-- 주간 네비게이터 -->
+            <!-- 캘린더 네비게이션 -->
             <div class="bg-white p-5 rounded-3xl border border-slate-200/80 shadow-sm space-y-4">
                 <div class="flex items-center justify-between">
                     <span class="text-[11px] font-extrabold text-blue-600 uppercase tracking-wider block">조회 기간 설정</span>
                     <button onclick="resetToToday()" class="text-[10px] bg-slate-100 hover:bg-slate-200 text-slate-700 px-2.5 py-1 rounded-lg font-bold transition tap-active">오늘로</button>
                 </div>
                 <div class="flex items-center justify-between bg-slate-50 p-1.5 rounded-2xl border border-slate-200/40">
-                    <button onclick="navigateWeek(-7)" class="p-3 hover:bg-white rounded-xl hover:shadow-sm transition text-slate-600 tap-active">
-                        <i data-lucide="chevron-left" class="w-5 h-5"></i>
-                    </button>
+                    <button onclick="navigateWeek(-7)" class="p-3 hover:bg-white rounded-xl hover:shadow-sm transition text-slate-600 tap-active"><i data-lucide="chevron-left" class="w-5 h-5"></i></button>
                     <div class="text-center">
                         <span class="text-xs font-extrabold text-slate-800 block" id="current-range-text">날짜 로딩중...</span>
                         <span class="text-[9px] text-slate-400 font-bold block mt-0.5" id="target-today-indicator">-</span>
                     </div>
-                    <button onclick="navigateWeek(7)" class="p-3 hover:bg-white rounded-xl hover:shadow-sm transition text-slate-600 tap-active">
-                        <i data-lucide="chevron-right" class="w-5 h-5"></i>
-                    </button>
+                    <button onclick="navigateWeek(7)" class="p-3 hover:bg-white rounded-xl hover:shadow-sm transition text-slate-600 tap-active"><i data-lucide="chevron-right" class="w-5 h-5"></i></button>
                 </div>
             </div>
 
@@ -146,176 +119,114 @@
                     </div>
                     <button onclick="resetAllergyFilters()" class="text-xs text-slate-400 hover:text-slate-600 font-bold">초기화</button>
                 </div>
-                
-                <div class="space-y-1.5">
-                    <span class="text-[10px] text-slate-400 font-bold uppercase tracking-wider block">맞춤형 프리셋 추가</span>
-                    <div class="grid grid-cols-2 gap-1.5">
-                        <button onclick="applyPreset('dairy')" class="text-[10px] bg-slate-50 hover:bg-sky-50 text-slate-700 p-2 rounded-xl font-bold border border-slate-200/60 transition text-center tap-active">🥛 유당불내증</button>
-                        <button onclick="applyPreset('seafood')" class="text-[10px] bg-slate-50 hover:bg-emerald-50 text-slate-700 p-2 rounded-xl font-bold border border-slate-200/60 transition text-center tap-active">🐟 해산물 회피</button>
-                        <button onclick="applyPreset('meat')" class="text-[10px] bg-slate-50 hover:bg-amber-50 text-slate-700 p-2 rounded-xl font-bold border border-slate-200/60 transition text-center tap-active">🥩 육류 회피</button>
-                        <button onclick="applyPreset('eggs')" class="text-[10px] bg-slate-50 hover:bg-yellow-50 text-slate-700 p-2 rounded-xl font-bold border border-slate-200/60 transition text-center tap-active">🥚 난류 제한</button>
-                    </div>
+                <div class="grid grid-cols-2 gap-1.5 mb-2">
+                    <button onclick="applyPreset('dairy')" class="text-[10px] bg-slate-50 hover:bg-sky-50 text-slate-700 p-2 rounded-xl font-bold border border-slate-200/60 transition text-center tap-active">🥛 유당</button>
+                    <button onclick="applyPreset('seafood')" class="text-[10px] bg-slate-50 hover:bg-emerald-50 text-slate-700 p-2 rounded-xl font-bold border border-slate-200/60 transition text-center tap-active">🐟 해산물</button>
+                    <button onclick="applyPreset('meat')" class="text-[10px] bg-slate-50 hover:bg-amber-50 text-slate-700 p-2 rounded-xl font-bold border border-slate-200/60 transition text-center tap-active">🥩 육류</button>
+                    <button onclick="applyPreset('eggs')" class="text-[10px] bg-slate-50 hover:bg-yellow-50 text-slate-700 p-2 rounded-xl font-bold border border-slate-200/60 transition text-center tap-active">🥚 난류</button>
                 </div>
-
                 <div class="grid grid-cols-3 gap-1 pt-3 border-t border-slate-100" id="allergy-container"></div>
             </div>
 
-            <!-- 내부 데이터 제어 및 캐시 관리 -->
+            <!-- 텔레메트리 (개발/로그) -->
             <div class="bg-slate-900 text-slate-300 p-4 rounded-3xl shadow-md space-y-3">
                 <div class="flex items-center justify-between border-b border-slate-800 pb-2">
                     <div class="flex items-center space-x-2">
                         <span class="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-ping"></span>
-                        <span class="font-bold text-[10px] uppercase tracking-wider text-slate-400">TELEMETRY</span>
+                        <span class="font-bold text-[10px] uppercase tracking-wider text-slate-400">TELEMETRY & CACHE</span>
                     </div>
                     <button onclick="clearLocalStorageCache()" class="text-[10px] text-red-400 hover:text-red-300 font-bold flex items-center gap-1 tap-active">
-                        <i data-lucide="trash-2" class="w-3 h-3"></i>
-                        캐시 비우기
+                        <i data-lucide="trash-2" class="w-3 h-3"></i> 캐시 비우기
                     </button>
                 </div>
-                <div id="log-container" class="text-[9px] font-mono space-y-1 h-20 overflow-y-auto text-slate-400 custom-scrollbar">
-                    <div>[App] 스마트 웹앱 로컬 DB 세팅 중...</div>
+                <div id="log-container" class="text-[9px] font-mono space-y-1 h-24 overflow-y-auto text-slate-400 custom-scrollbar">
+                    <div>[App] 시스템 부팅 중...</div>
                 </div>
             </div>
-
         </div>
 
-        <!-- 오른쪽 패널: 메인 탭 영역 (식단 목록 및 AI 코치 분석) -->
+        <!-- 우측 패널 (메인 식단 & AI) -->
         <div class="lg:col-span-8 space-y-5">
             
-            <!-- 상단 모바일 터치 친화적 탭바 -->
+            <!-- 탭 전환 -->
             <div class="bg-white p-1.5 rounded-2xl border border-slate-200 flex space-x-1 shadow-sm">
                 <button onclick="switchTab('weekly')" id="tab-weekly" class="flex-1 py-2.5 text-xs md:text-sm font-extrabold rounded-xl bg-blue-600 text-white shadow-sm flex items-center justify-center space-x-1.5 transition-all tap-active">
-                    <i data-lucide="layout-grid" class="w-4 h-4"></i>
-                    <span>이번 주 식단표</span>
+                    <i data-lucide="layout-grid" class="w-4 h-4"></i><span>주간 식단표</span>
                 </button>
                 <button onclick="switchTab('daily')" id="tab-daily" class="flex-1 py-2.5 text-xs md:text-sm font-extrabold text-slate-600 hover:bg-slate-100 rounded-xl flex items-center justify-center space-x-1.5 transition-all tap-active">
-                    <i data-lucide="sparkles" class="w-4 h-4"></i>
-                    <span>실시간 정밀 AI 코칭</span>
+                    <i data-lucide="sparkles" class="w-4 h-4"></i><span>상세 AI 분석</span>
                 </button>
             </div>
 
-            <!-- 주간 급식 뷰 -->
+            <!-- 주간 식단 뷰 -->
             <div id="view-weekly" class="space-y-4">
                 <div class="flex items-center justify-between">
                     <h3 class="text-sm font-extrabold text-slate-800 flex items-center gap-1.5">
-                        <span class="w-2.5 h-2.5 bg-blue-600 rounded-full"></span>
-                        <span id="school-title-display">성일고등학교 오늘의 급식</span>
+                        <span class="w-2.5 h-2.5 bg-blue-600 rounded-full"></span><span id="school-title-display">성일고등학교 오늘의 급식</span>
                     </h3>
-                    <div class="flex space-x-1">
-                        <button onclick="shareWeeklySummary()" class="p-2 bg-white border rounded-xl shadow-sm text-slate-500 hover:text-blue-600 transition tap-active" title="전체 식단 복사">
-                            <i data-lucide="copy" class="w-4 h-4"></i>
-                        </button>
-                    </div>
+                    <button onclick="shareWeeklySummary()" class="p-2 bg-white border rounded-xl shadow-sm text-slate-500 hover:text-blue-600 transition tap-active"><i data-lucide="copy" class="w-4 h-4"></i></button>
                 </div>
-
                 <div class="grid grid-cols-1 md:grid-cols-5 gap-4" id="weekly-cards-grid">
                     <div class="col-span-full py-16 text-center text-slate-400 font-semibold flex flex-col items-center justify-center gap-2">
-                        <div class="loader"></div>
-                        <span>NEIS API 서버로부터 실시간 급식 데이터를 파싱하여 가져오고 있습니다...</span>
+                        <div class="loader"></div><span>데이터 수집 중...</span>
                     </div>
                 </div>
             </div>
 
-            <!-- 상세 뷰 및 실시간 AI 코치 영역 -->
+            <!-- 상세 AI 뷰 -->
             <div id="view-daily" class="hidden space-y-4">
                 <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                     <h3 class="text-sm font-extrabold text-slate-800 flex items-center gap-1.5">
-                        <span class="w-2.5 h-2.5 bg-indigo-600 rounded-full animate-pulse"></span>
-                        <span>실시간 급식 영양분배 리포트</span>
+                        <span class="w-2.5 h-2.5 bg-indigo-600 rounded-full animate-pulse"></span><span>실시간 영양 및 AI 코치 리포트</span>
                     </h3>
-                    <div class="flex space-x-1 bg-slate-200/60 p-1 rounded-xl border border-slate-300/40" id="daily-day-selector">
-                        <!-- 일일 토글 버튼 -->
-                    </div>
+                    <div class="flex space-x-1 bg-slate-200/60 p-1 rounded-xl border border-slate-300/40" id="daily-day-selector"></div>
                 </div>
 
-                <!-- 영양 구성 및 실시간 AI 상담소 -->
                 <div class="grid grid-cols-1 md:grid-cols-12 gap-5">
-                    
-                    <!-- 음식 분석 테이블 -->
-                    <div class="md:col-span-7 bg-white rounded-3xl border border-slate-200/80 p-6 shadow-sm flex flex-col justify-between" id="daily-detail-card">
-                        <!-- 동적 생성 -->
-                    </div>
+                    <!-- 상세 메뉴 및 영양 바 -->
+                    <div class="md:col-span-7 bg-white rounded-3xl border border-slate-200/80 p-6 shadow-sm flex flex-col justify-between" id="daily-detail-card"></div>
 
-                    <!-- AI 영양사 비서 -->
+                    <!-- AI 비서 봇 -->
                     <div class="md:col-span-5 bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 text-white rounded-3xl p-6 shadow-md flex flex-col justify-between relative overflow-hidden">
-                        <div class="absolute -right-10 -bottom-10 opacity-5 pointer-events-none">
-                            <i data-lucide="brain" class="w-44 h-44 text-white"></i>
-                        </div>
-                        
+                        <div class="absolute -right-10 -bottom-10 opacity-5 pointer-events-none"><i data-lucide="brain" class="w-44 h-44 text-white"></i></div>
                         <div class="relative z-10 space-y-4">
                             <div class="flex items-center justify-between border-b border-indigo-900 pb-3">
                                 <div class="flex items-center space-x-2">
-                                    <div class="p-2 bg-indigo-600/30 border border-indigo-500/40 rounded-xl">
-                                        <i data-lucide="bot" class="w-4 h-4 text-emerald-400"></i>
-                                    </div>
-                                    <div>
-                                        <h4 class="text-xs font-extrabold text-white">AI 맞춤 급식 피드백</h4>
-                                        <p class="text-[9px] text-indigo-300/80">Gemini 2.5 AI 실시간 분석</p>
-                                    </div>
+                                    <div class="p-2 bg-indigo-600/30 border border-indigo-500/40 rounded-xl"><i data-lucide="bot" class="w-4 h-4 text-emerald-400"></i></div>
+                                    <div><h4 class="text-xs font-extrabold text-white">AI 맞춤 급식 피드백</h4><p class="text-[9px] text-indigo-300/80">Gemini 2.5 Flash 엔진</p></div>
                                 </div>
                                 <button onclick="triggerAiCoaching()" class="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white text-[10px] font-bold rounded-xl transition flex items-center gap-1 shadow-md tap-active">
-                                    <i data-lucide="wand-2" class="w-3.5 h-3.5"></i>
-                                    분석 실행
+                                    <i data-lucide="wand-2" class="w-3.5 h-3.5"></i> 분석 실행
                                 </button>
                             </div>
-
                             <div id="ai-response-box" class="text-xs leading-relaxed space-y-3 min-h-[160px] text-indigo-100 custom-scrollbar overflow-y-auto max-h-60 pr-1">
-                                <p class="text-slate-400 text-center py-12">우측 상단 [분석 실행] 버튼을 클릭하시면, 해당 식단의 성장 촉진 비율 및 최적의 대체 저녁 레시피를 실시간 인공지능 분석하여 로드합니다.</p>
+                                <p class="text-slate-400 text-center py-12">우측 상단 [분석 실행] 버튼을 클릭하시면, 오늘 급식을 분석하여 오후 집중력 전략 및 저녁 메뉴를 추천합니다.</p>
                             </div>
                         </div>
-
-                        <div class="relative z-10 border-t border-indigo-900/60 pt-3 mt-4 text-[9px] text-indigo-400">
-                            ※ 본 급식 인공지능 코칭 시스템은 공식 수집 정보 기반 학업 집중도 최적화 코칭 가이드라인을 준수합니다.
-                        </div>
                     </div>
-
                 </div>
             </div>
-
         </div>
     </main>
 
-    <!-- 모바일 하단 플로팅 퀵 바 (네이티브 앱 감성 피팅) -->
+    <!-- 모바일 하단 네비게이션 -->
     <nav class="fixed bottom-0 left-0 right-0 bg-white/95 border-t border-slate-200/80 backdrop-blur-md py-2.5 px-6 flex justify-around items-center z-40 md:hidden shadow-lg">
-        <button onclick="switchTab('weekly')" class="flex flex-col items-center gap-1 text-slate-500 active:text-blue-600 transition tap-active">
-            <i data-lucide="calendar" class="w-5 h-5"></i>
-            <span class="text-[9px] font-bold">주간급식</span>
-        </button>
-        <button onclick="switchTab('daily')" class="flex flex-col items-center gap-1 text-slate-500 active:text-blue-600 transition tap-active">
-            <i data-lucide="sparkles" class="w-5 h-5"></i>
-            <span class="text-[9px] font-bold">AI 피드백</span>
-        </button>
-        <button onclick="shareTodayMenu()" class="flex flex-col items-center gap-1 text-slate-500 active:text-blue-600 transition tap-active">
-            <i data-lucide="share" class="w-5 h-5"></i>
-            <span class="text-[9px] font-bold">공유하기</span>
-        </button>
+        <button onclick="switchTab('weekly')" class="flex flex-col items-center gap-1 text-slate-500 active:text-blue-600 transition tap-active"><i data-lucide="calendar" class="w-5 h-5"></i><span class="text-[9px] font-bold">주간급식</span></button>
+        <button onclick="switchTab('daily')" class="flex flex-col items-center gap-1 text-slate-500 active:text-blue-600 transition tap-active"><i data-lucide="sparkles" class="w-5 h-5"></i><span class="text-[9px] font-bold">AI분석</span></button>
+        <button onclick="shareTodayMenu()" class="flex flex-col items-center gap-1 text-slate-500 active:text-blue-600 transition tap-active"><i data-lucide="share" class="w-5 h-5"></i><span class="text-[9px] font-bold">공유하기</span></button>
     </nav>
 
     <script>
-        const apiKey = ""; // Gemini API key
+        const apiKey = ""; // Gemini API Key
 
-        const ALLERGY_INFO = {
-            1: "난류", 2: "우유", 3: "메밀", 4: "땅콩", 5: "대두", 
-            6: "밀", 7: "고등어", 8: "게", 9: "새우", 10: "돼지고기", 
-            11: "복숭아", 12: "토마토", 13: "아황산류", 14: "호두", 
-            15: "닭고기", 16: "쇠고기", 17: "오징어", 18: "조개류", 19: "잣"
-        };
-
-        const PRESETS = {
-            dairy: [2],
-            seafood: [7, 8, 9, 17, 18],
-            meat: [10, 15, 16],
-            eggs: [1]
-        };
+        const ALLERGY_INFO = { 1: "난류", 2: "우유", 3: "메밀", 4: "땅콩", 5: "대두", 6: "밀", 7: "고등어", 8: "게", 9: "새우", 10: "돼지고기", 11: "복숭아", 12: "토마토", 13: "아황산류", 14: "호두", 15: "닭고기", 16: "쇠고기", 17: "오징어", 18: "조개류", 19: "잣" };
+        const PRESETS = { dairy: [2], seafood: [7, 8, 9, 17, 18], meat: [10, 15, 16], eggs: [1] };
 
         let activeAllergies = new Set([1, 2, 5, 6]);
         let scrapedMeals = {}; 
         let currentSelectedDate = null;
-        let currentTargetDate = new Date('2026-05-18'); // 가상 시간 동기화
-
-        let touchStartX = 0;
-        let touchEndX = 0;
-        let deferredPrompt;
+        let currentTargetDate = new Date('2026-05-18'); 
+        let touchStartX = 0, touchEndX = 0, deferredPrompt;
 
         window.onload = () => {
             lucide.createIcons();
@@ -326,173 +237,11 @@
             registerPwaAndNotificationCheck();
         };
 
-        // 🔔 1. 푸시 알림 등록 및 서비스 워커 이니셜라이징 (핵심)
-        function registerPwaAndNotificationCheck() {
-            if ('serviceWorker' in navigator && 'PushManager' in window) {
-                // 깃허브 배포 경로 호환성을 위해 sw.js 호출 연동
-                navigator.serviceWorker.register('sw.js')
-                .then(registration => {
-                    addLog("[App] 서비스 워커 백그라운드 엔진이 정상 활성화되었습니다.", "success");
-                    checkNotificationStatus();
-                })
-                .catch(err => {
-                    addLog(`[App] 서비스 워커 설치 지연: ${err.message}`, "warn");
-                });
-            } else {
-                addLog("[App] 이 브라우저는 백그라운드 실시간 알람 기능을 지원하지 않습니다.", "error");
-            }
-
-            // 가상 인스톨 체크
-            window.addEventListener('beforeinstallprompt', (e) => {
-                e.preventDefault();
-                deferredPrompt = e;
-                document.getElementById('install-banner').classList.remove('hidden');
-            });
-        }
-
-        // 권한 활성화 요청
-        function requestNotificationPermission() {
-            if (!('Notification' in window)) {
-                showToast("현재 사용하시는 브라우저는 푸시 알람을 지원하지 않습니다.");
-                return;
-            }
-
-            Notification.requestPermission().then(permission => {
-                if (permission === 'granted') {
-                    showToast("성일고 급식실 아침 알림 수신이 완벽하게 활성화되었습니다!");
-                    document.getElementById('alarm-badge').textContent = "알림 활성화";
-                    document.getElementById('alarm-badge').className = "text-[9px] bg-emerald-500/20 text-emerald-300 px-2 py-0.5 rounded-full font-bold border border-emerald-500/30";
-                    addLog("[App] 시스템 푸시 알람 마스터 권한이 허용되었습니다.", "success");
-                } else {
-                    showToast("알림 수신이 차단되었습니다. 스마트폰 설정에서 권한을 수동 허용해 주세요.");
-                }
-            });
-        }
-
-        function checkNotificationStatus() {
-            if (Notification.permission === 'granted') {
-                document.getElementById('alarm-badge').textContent = "알림 활성화";
-                document.getElementById('alarm-badge').className = "text-[9px] bg-emerald-500/20 text-emerald-300 px-2 py-0.5 rounded-full font-bold border border-emerald-500/30";
-            }
-        }
-
-        // 3초 뒤 서비스 워커를 통한 알림 테스트 발송 기능
-        function sendTestNotification() {
-            showToast("3초 뒤 화면을 끄거나 다른 앱을 보고 있어도 가상 알람이 전송됩니다.");
-            
-            if (navigator.serviceWorker.controller) {
-                setTimeout(() => {
-                    navigator.serviceWorker.ready.then(registration => {
-                        registration.active.postMessage({
-                            type: 'SEND_TEST_ALARM',
-                            title: '🔔 성일고 아침 급식 배달',
-                            body: '오늘 점심: 수제치즈돈까스, 냉이순두부찌개, 봄동겉절이가 나옵니다! 칼로리는 840kcal입니다.'
-                        });
-                    });
-                }, 3000);
-            } else {
-                // 서비스 워커 등록 이전인 경우 일반 알림 폴백 작동
-                setTimeout(() => {
-                    new Notification("🔔 성일고 아침 급식 배달", {
-                        body: "오늘 점심: 수제치즈돈까스, 냉이순두부찌개, 봄동겉절이가 나옵니다! (840kcal)"
-                    });
-                }, 3000);
-            }
-        }
-
-        // 스와이프 모션 컨트롤러
-        function setupSwipeGestures() {
-            const zone = document.getElementById('touch-swipe-zone');
-            zone.addEventListener('touchstart', (e) => {
-                touchStartX = e.changedTouches[0].screenX;
-            }, { passive: true });
-
-            zone.addEventListener('touchend', (e) => {
-                touchEndX = e.changedTouches[0].screenX;
-                handleSwipeGesture();
-            }, { passive: true });
-        }
-
-        function handleSwipeGesture() {
-            const swipeThreshold = 100;
-            const diffX = touchEndX - touchStartX;
-
-            if (Math.abs(diffX) > swipeThreshold) {
-                if (diffX > 0) {
-                    navigateWeek(-7);
-                    showToast("이전 주 급식을 조회합니다.");
-                } else {
-                    navigateWeek(7);
-                    showToast("다음 주 급식을 조회합니다.");
-                }
-            }
-        }
-
-        function triggerPwaInstall() {
-            if (deferredPrompt) {
-                deferredPrompt.prompt();
-                deferredPrompt.userChoice.then((choiceResult) => {
-                    if (choiceResult.outcome === 'accepted') {
-                        addLog("[App] 홈 화면에 성일고 급식 앱 설치가 성공적으로 인가되었습니다.", "success");
-                    }
-                    deferredPrompt = null;
-                });
-            } else {
-                showToast("현재 주소 표시줄 우측 또는 설정을 통해 [홈 화면에 추가]를 클릭하시면 바탕화면 앱으로 등록이 완료됩니다.");
-            }
-        }
-
-        function showToast(message) {
-            const toast = document.getElementById('custom-toast');
-            const msgEl = document.getElementById('toast-message');
-            msgEl.textContent = message;
-            toast.className = "fixed top-20 left-1/2 -translate-x-1/2 z-50 transform translate-y-0 opacity-100 transition-all duration-300 max-w-[90%] w-80";
-            setTimeout(() => {
-                toast.className = "fixed top-20 left-1/2 -translate-x-1/2 z-50 transform translate-y-[-100px] opacity-0 transition-all duration-300 pointer-events-none max-w-[90%] w-80";
-            }, 3000);
-        }
-
-        function getWeekDateRange(targetDate) {
-            const currentDay = targetDate.getDay();
-            let distanceToMonday = 1 - currentDay;
-            if (currentDay === 0) distanceToMonday = -6; 
-            if (currentDay === 6) distanceToMonday = 2; 
-
-            const monday = new Date(targetDate);
-            monday.setDate(targetDate.getDate() + distanceToMonday);
-            
-            const friday = new Date(monday);
-            friday.setDate(monday.getDate() + 4);
-
-            return {
-                fromStr: formatDateToYYYYMMDD(monday),
-                toStr: formatDateToYYYYMMDD(friday),
-                fromText: formatDateToDisplay(monday),
-                toText: formatDateToDisplay(friday)
-            };
-        }
-
-        function formatDateToYYYYMMDD(dateObj) {
-            const yyyy = dateObj.getFullYear();
-            const mm = String(dateObj.getMonth() + 1).padStart(2, '0');
-            const dd = String(dateObj.getDate()).padStart(2, '0');
-            return `${yyyy}${mm}${dd}`;
-        }
-
-        function formatDateToDisplay(dateObj) {
-            const mm = String(dateObj.getMonth() + 1).padStart(2, '0');
-            const dd = String(dateObj.getDate()).padStart(2, '0');
-            return `${mm}월 ${dd}일`;
-        }
-
+        // --- 공통 유틸 ---
         function addLog(msg, type='info') {
             const logContainer = document.getElementById('log-container');
             const time = new Date().toLocaleTimeString();
-            let color = 'text-slate-400';
-            if(type === 'success') color = 'text-emerald-400 font-bold';
-            if(type === 'error') color = 'text-rose-400 font-extrabold';
-            if(type === 'warn') color = 'text-amber-400';
-
+            let color = type === 'success' ? 'text-emerald-400 font-bold' : type === 'error' ? 'text-rose-400 font-extrabold' : 'text-slate-400';
             const logEl = document.createElement('div');
             logEl.className = color;
             logEl.textContent = `[${time}] ${msg}`;
@@ -500,564 +249,274 @@
             logContainer.scrollTop = logContainer.scrollHeight;
         }
 
+        function showToast(message) {
+            const toast = document.getElementById('custom-toast');
+            document.getElementById('toast-message').textContent = message;
+            toast.className = "fixed top-20 left-1/2 -translate-x-1/2 z-50 transform translate-y-0 opacity-100 transition-all duration-300 max-w-[90%] w-80";
+            setTimeout(() => { toast.className = "fixed top-20 left-1/2 -translate-x-1/2 z-50 transform translate-y-[-100px] opacity-0 transition-all duration-300 pointer-events-none max-w-[90%] w-80"; }, 3000);
+        }
+
         function setStatus(state) {
             const indicator = document.getElementById('status-indicator');
-            if(state === 'loading') {
-                indicator.innerHTML = `<span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-100 text-blue-800"><div class="loader mr-1.5"></div>수신중</span>`;
-            } else if (state === 'success') {
-                indicator.innerHTML = `<span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800"><span class="w-1 h-1 mr-1.5 bg-emerald-500 rounded-full"></span>동기화 완료</span>`;
-            } else if (state === 'cached') {
-                indicator.innerHTML = `<span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-indigo-100 text-indigo-800"><span class="w-1 h-1 mr-1.5 bg-indigo-500 rounded-full"></span>로컬 로드</span>`;
-            } else {
-                indicator.innerHTML = `<span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-100 text-rose-800"><span class="w-1 h-1 mr-1.5 bg-rose-500 rounded-full"></span>수신 에러</span>`;
+            if(state === 'loading') indicator.innerHTML = `<span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-100 text-blue-800"><div class="loader mr-1.5"></div>수신중</span>`;
+            else if (state === 'success') indicator.innerHTML = `<span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800">동기화 완료</span>`;
+            else if (state === 'cached') indicator.innerHTML = `<span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-indigo-100 text-indigo-800">로컬 로드</span>`;
+            else indicator.innerHTML = `<span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-100 text-rose-800">수신 에러</span>`;
+        }
+
+        // --- 알림 (푸시 & 서비스워커) ---
+        function registerPwaAndNotificationCheck() {
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.register('./sw.js')
+                .then(reg => { addLog("[App] 서비스 워커 엔진 활성화 완료 (./sw.js)", "success"); checkNotificationStatus(); })
+                .catch(err => { addLog(`[App] 서비스 워커 오류: ${err.message}`, "error"); });
+            }
+            window.addEventListener('beforeinstallprompt', (e) => {
+                e.preventDefault(); deferredPrompt = e;
+                document.getElementById('install-banner').classList.remove('hidden');
+            });
+        }
+
+        function requestNotificationPermission() {
+            if (!('Notification' in window)) return showToast("브라우저가 알림을 지원하지 않습니다.");
+            Notification.requestPermission().then(permission => {
+                if (permission === 'granted') {
+                    showToast("성일고 급식실 아침 알림이 활성화되었습니다!");
+                    checkNotificationStatus();
+                    addLog("[App] 푸시 권한 획득 성공", "success");
+                } else {
+                    showToast("알림이 차단되었습니다. 기기 설정에서 허용해주세요.");
+                }
+            });
+        }
+
+        function checkNotificationStatus() {
+            if (Notification.permission === 'granted') {
+                const badge = document.getElementById('alarm-badge');
+                badge.textContent = "알림 활성화됨";
+                badge.className = "text-[9px] bg-emerald-500/20 text-emerald-300 px-2 py-0.5 rounded-full font-bold border border-emerald-500/30";
             }
         }
 
-        function navigateWeek(daysOffset) {
-            currentTargetDate.setDate(currentTargetDate.getDate() + daysOffset);
-            fetchNeisTodayData();
+        function sendTestNotificationDirectly() {
+            if (Notification.permission !== 'granted') return showToast("먼저 [1단계: 알림 권한 허용하기] 버튼을 눌러주세요!");
+            showToast("3초 뒤 알림이 발송됩니다. 홈 화면으로 나가보세요!");
+            addLog("3초 뒤 백그라운드 푸시 강제 명령 예약", "info");
+            setTimeout(() => {
+                navigator.serviceWorker.ready.then(reg => {
+                    reg.showNotification('🔔 성일고등학교 아침 급식 알람', {
+                        body: '오늘 점심 메뉴가 도착했습니다. 눌러서 AI 분석을 확인하세요! (840kcal)',
+                        icon: 'https://cdn-icons-png.flaticon.com/512/3408/3408506.png',
+                        badge: 'https://cdn-icons-png.flaticon.com/512/3408/3408506.png',
+                        vibrate: [200, 100, 200]
+                    });
+                    addLog("테스트 알림 송출 명령 하달 성공", "success");
+                }).catch(err => addLog(`알림 에러: ${err}`, "error"));
+            }, 3000);
         }
 
-        function resetToToday() {
-            currentTargetDate = new Date('2026-05-18');
-            fetchNeisTodayData();
+        // --- 급식 데이터 로직 ---
+        function getWeekDateRange(targetDate) {
+            const cd = targetDate.getDay();
+            let dist = 1 - cd; if(cd===0) dist = -6; if(cd===6) dist = 2;
+            const mon = new Date(targetDate); mon.setDate(targetDate.getDate() + dist);
+            const fri = new Date(mon); fri.setDate(mon.getDate() + 4);
+            const fmt = d => `${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}${String(d.getDate()).padStart(2,'0')}`;
+            const txt = d => `${String(d.getMonth()+1).padStart(2,'0')}월 ${String(d.getDate()).padStart(2,'0')}일`;
+            return { fromStr: fmt(mon), toStr: fmt(fri), fromText: txt(mon), toText: txt(fri) };
         }
 
-        // 로컬 스토리지 기반 무중단 오프라인 지원
         async function fetchNeisTodayData() {
             setStatus('loading');
-            const weekRange = getWeekDateRange(currentTargetDate);
+            const range = getWeekDateRange(currentTargetDate);
+            document.getElementById('current-range-text').textContent = `${range.fromText} ~ ${range.toText}`;
             
-            document.getElementById('current-range-text').textContent = `${weekRange.fromText} ~ ${weekRange.toText}`;
-            const days = ["일", "월", "화", "수", "목", "금", "토"];
-            document.getElementById('target-today-indicator').textContent = `${formatDateToYYYYMMDD(currentTargetDate).substring(0,4)}-${formatDateToYYYYMMDD(currentTargetDate).substring(4,6)}-${formatDateToYYYYMMDD(currentTargetDate).substring(6,8)} (${days[currentTargetDate.getDay()]})`;
-
-            const cacheKey = `seongil_meal_cache_${weekRange.fromStr}_${weekRange.toStr}`;
-            const cachedData = localStorage.getItem(cacheKey);
-
-            if (cachedData) {
-                addLog("[DB] 기존 디바이스 백업 데이터를 발견하였습니다. 즉시 투영합니다.", "success");
-                scrapedMeals = JSON.parse(cachedData);
-                setStatus('cached');
-                completeSetup();
-                return;
+            const cacheKey = `seongil_meal_${range.fromStr}_${range.toStr}`;
+            const cached = localStorage.getItem(cacheKey);
+            if (cached) {
+                scrapedMeals = JSON.parse(cached); setStatus('cached');
+                addLog("[DB] 내부 오프라인 캐시 적용됨.", "success");
+                completeSetup(); return;
             }
 
-            addLog("NEIS 공공 포털에 원격 실시간 동기화 요청 중...", "info");
-
             try {
+                addLog("NEIS 공공데이터 포털 호출 중...", "info");
                 const schoolRes = await fetch('https://open.neis.go.kr/hub/schoolInfo?Type=json&SCHUL_NM=성일고등학교');
                 const schoolData = await schoolRes.json();
-                
-                if (!schoolData.schoolInfo) throw new Error("식별 매칭 실패");
-                
                 const school = schoolData.schoolInfo[1].row.find(s => s.ATPT_OFCDC_SC_NM.includes('경기'));
-                const aeCode = school.ATPT_OFCDC_SC_CODE; 
-                const seCode = school.SD_SCHUL_CODE;      
                 
-                const mealUrl = `https://open.neis.go.kr/hub/mealServiceDietInfo?Type=json&ATPT_OFCDC_SC_CODE=${aeCode}&SD_SCHUL_CODE=${seCode}&MLSV_FROM_YMD=${weekRange.fromStr}&MLSV_TO_YMD=${weekRange.toStr}`;
-                const mealRes = await fetch(mealUrl);
+                const mealRes = await fetch(`https://open.neis.go.kr/hub/mealServiceDietInfo?Type=json&ATPT_OFCDC_SC_CODE=${school.ATPT_OFCDC_SC_CODE}&SD_SCHUL_CODE=${school.SD_SCHUL_CODE}&MLSV_FROM_YMD=${range.fromStr}&MLSV_TO_YMD=${range.toStr}`);
                 const mealData = await mealRes.json();
                 
                 if (!mealData.mealServiceDietInfo) {
-                    addLog("당해 요일 원본이 부재합니다. 임시 대체 급식을 수립합니다.", "warn");
-                    generateSimulatedWeekData(weekRange, cacheKey);
-                    return;
+                    addLog("데이터 미등록. 자체 시뮬레이션 데이터를 불러옵니다.", "warn");
+                    generateSimulatedWeekData(range, cacheKey); return;
                 }
                 
-                const rawRows = mealData.mealServiceDietInfo[1].row;
-                addLog(`실시간 동기화 완료! (${rawRows.length}개 식단 세트)`, "success");
-                
-                processAndSaveNeisData(rawRows, cacheKey);
-                setStatus('success');
-
-            } catch (error) {
-                addLog(`네트워크 전송 불안정: ${error.message}. 비상 가공 급식단을 대입합니다.`, "error");
-                generateSimulatedWeekData(weekRange, cacheKey);
+                scrapedMeals = {};
+                mealData.mealServiceDietInfo[1].row.forEach(r => {
+                    const dt = `${r.MLSV_YMD.substring(0,4)}-${r.MLSV_YMD.substring(4,6)}-${r.MLSV_YMD.substring(6,8)}`;
+                    const cal = r.CAL_INFO ? parseInt(r.CAL_INFO.replace(/[^0-9.]/g, '')) : 0;
+                    const getMac = n => { const m = (r.NTR_INFO||"").match(new RegExp(`${n}\\(g\\)\\s*:\\s*([\\d.]+)`)); return m ? Math.round(parseFloat(m[1])) : 0; };
+                    scrapedMeals[dt] = {
+                        dateStr: dt, rawMenu: r.DDISH_NM.replace(/<br\/>/g, ", "), calories: cal,
+                        nutrition: { carbo: getMac('탄수화물')||Math.round(cal*.55/4), protein: getMac('단백질')||Math.round(cal*.15/4), fat: getMac('지방')||Math.round(cal*.30/9) }
+                    };
+                });
+                localStorage.setItem(cacheKey, JSON.stringify(scrapedMeals));
+                setStatus('success'); addLog("원격 동기화 완료", "success"); completeSetup();
+            } catch (e) {
+                addLog(`동기화 실패: ${e.message}`, "error"); generateSimulatedWeekData(range, cacheKey);
             }
         }
 
-        function processAndSaveNeisData(rawRows, cacheKey) {
-            scrapedMeals = {};
-            
-            rawRows.forEach(row => {
-                const yyyy = row.MLSV_YMD.substring(0,4);
-                const mm = row.MLSV_YMD.substring(4,6);
-                const dd = row.MLSV_YMD.substring(6,8);
-                const dateKey = `${yyyy}-${mm}-${dd}`;
-
-                const menuString = row.DDISH_NM.replace(/<br\/>/g, ", ");
-                const calories = row.CAL_INFO ? parseInt(row.CAL_INFO.replace(/[^0-9.]/g, '')) : 0;
-                
-                const ntr = row.NTR_INFO || "";
-                const getMacro = (name) => {
-                    const match = ntr.match(new RegExp(`${name}\\(g\\)\\s*:\\s*([\\d.]+)`));
-                    return match ? Math.round(parseFloat(match[1])) : 0;
-                };
-
-                scrapedMeals[dateKey] = {
-                    dateStr: dateKey,
-                    rawMenu: menuString,
-                    calories: calories,
-                    nutrition: {
-                        carbo: getMacro('탄수화물') || Math.round(calories * 0.55 / 4),
-                        protein: getMacro('단백질') || Math.round(calories * 0.15 / 4),
-                        fat: getMacro('지방') || Math.round(calories * 0.30 / 9)
-                    }
-                };
-            });
-
-            localStorage.setItem(cacheKey, JSON.stringify(scrapedMeals));
-            completeSetup();
-        }
-
-        function generateSimulatedWeekData(weekRange, cacheKey) {
-            scrapedMeals = {};
-            const weekdays = ["월", "화", "수", "목", "금"];
-            
-            const startYear = parseInt(weekRange.fromStr.substring(0,4));
-            const startMonth = parseInt(weekRange.fromStr.substring(4,6)) - 1;
-            const startDay = parseInt(weekRange.fromStr.substring(6,8));
-
-            const mealsPreset = [
-                {
-                    rawMenu: "찰수수밥, 매콤동태국5.6.13., 수제치즈불고기버거1.2.5.6.10.12.13.15., 부추겉절이5.6.13., 포기김치9.13., 요구르트2.",
-                    calories: 835, nutrition: { carbo: 112, protein: 29, fat: 24 }
-                },
-                {
-                    rawMenu: "발아현미밥, 꽃게된장찌개5.6.8.13., 불향제육볶음5.6.10.13., 에그크럼블1.5., 배추김치9.13., 사과즙",
-                    calories: 790, nutrition: { carbo: 98, protein: 34, fat: 20 }
-                },
-                {
-                    rawMenu: "치킨마요덮밥1.5.6.13., 유부맑은장국5.6.13., 칠리감자구이2.5.6.12.13., 석박지9.13., 방울토마토12.",
-                    calories: 865, nutrition: { carbo: 121, protein: 25, fat: 27 }
-                },
-                {
-                    rawMenu: "기장밥, 쇠고기미역국5.6.16., 삼치유자구이5.6.13., 감자볶음5., 포기김치9.13., 식혜",
-                    calories: 820, nutrition: { carbo: 104, protein: 32, fat: 21 }
-                },
-                {
-                    rawMenu: "짜장면1.5.6.10.13., 계란국1., 사천꿔바로우탕수육1.5.6.10.11.12.13., 단무지, 배추김치9.13., 파인애플",
-                    calories: 910, nutrition: { carbo: 128, protein: 28, fat: 29 }
-                }
+        function generateSimulatedWeekData(range, cacheKey) {
+            const wd = ["월", "화", "수", "목", "금"];
+            const y = parseInt(range.fromStr.substring(0,4)), m = parseInt(range.fromStr.substring(4,6))-1, d = parseInt(range.fromStr.substring(6,8));
+            const preset = [
+                {m: "찰수수밥, 매콤동태국5.6.13., 수제치즈불고기버거1.2.5.6.10.12., 부추겉절이, 요구르트", c: 835, n: {carbo: 112, protein: 29, fat: 24}},
+                {m: "발아현미밥, 꽃게된장찌개5.8., 불향제육볶음5.10., 에그크럼블1., 배추김치, 사과즙", c: 790, n: {carbo: 98, protein: 34, fat: 20}},
+                {m: "치킨마요덮밥1.15., 유부맑은장국5., 칠리감자구이, 석박지, 방울토마토12.", c: 865, n: {carbo: 121, protein: 25, fat: 27}},
+                {m: "기장밥, 쇠고기미역국16., 삼치유자구이, 감자볶음, 포기김치, 식혜", c: 820, n: {carbo: 104, protein: 32, fat: 21}},
+                {m: "짜장면1.10., 계란국1., 사천꿔바로우탕수육1.10., 단무지, 파인애플", c: 910, n: {carbo: 128, protein: 28, fat: 29}}
             ];
-
+            scrapedMeals = {};
             for(let i=0; i<5; i++) {
-                const dateObj = new Date(startYear, startMonth, startDay + i);
-                const dateKey = `${dateObj.getFullYear()}-${String(dateObj.getMonth()+1).padStart(2, '0')}-${String(dateObj.getDate()).padStart(2, '0')}`;
-                
-                const currentPreset = mealsPreset[i % mealsPreset.length];
-                scrapedMeals[dateKey] = {
-                    dateStr: `${dateKey}(${weekdays[i]})`,
-                    rawMenu: currentPreset.rawMenu,
-                    calories: currentPreset.calories,
-                    nutrition: currentPreset.nutrition
-                };
+                const dt = new Date(y, m, d+i);
+                const dtKey = `${dt.getFullYear()}-${String(dt.getMonth()+1).padStart(2,'0')}-${String(dt.getDate()).padStart(2,'0')}`;
+                scrapedMeals[dtKey] = { dateStr: `${dtKey}(${wd[i]})`, rawMenu: preset[i].m, calories: preset[i].c, nutrition: preset[i].n };
             }
-
             localStorage.setItem(cacheKey, JSON.stringify(scrapedMeals));
-            completeSetup();
-        }
-
-        function clearLocalStorageCache() {
-            localStorage.clear();
-            addLog("[App] 내부 메모리 클렌징을 완료하였습니다.", "error");
-            showToast("캐시가 소멸되었습니다. 페이지를 재호스팅합니다.");
-            setTimeout(() => { location.reload(); }, 1000);
+            setStatus('success'); completeSetup();
         }
 
         function completeSetup() {
             const dates = Object.keys(scrapedMeals).sort();
             if (dates.length > 0) {
-                const todayFormatted = formatDateToYYYYMMDD(currentTargetDate).replace(/(\d{4})(\d{2})(\d{2})/, "$1-$2-$3");
-                if (scrapedMeals[todayFormatted]) {
-                    currentSelectedDate = todayFormatted;
-                } else {
-                    currentSelectedDate = dates[0];
-                }
+                const today = `${currentTargetDate.getFullYear()}-${String(currentTargetDate.getMonth()+1).padStart(2,'0')}-${String(currentTargetDate.getDate()).padStart(2,'0')}`;
+                currentSelectedDate = scrapedMeals[today] ? today : dates[0];
             }
-            renderWeeklyView();
-            renderDailySelector();
-            renderDailyDetail();
+            renderWeeklyView(); renderDailySelector(); renderDailyDetail();
         }
 
-        function processMenu(rawMenu) {
-            if (!rawMenu) return [];
-            
-            const rawItems = rawMenu.split(',');
-            return rawItems.map(item => {
-                const trimmed = item.trim();
-                const match = trimmed.match(/[0-9.]+$/);
-                
-                let allergyCodes = [];
-                let cleanName = trimmed;
-                
-                if (match) {
-                    allergyCodes = match[0].split('.').map(n => parseInt(n.trim())).filter(n => !isNaN(n));
-                    cleanName = trimmed.replace(/[0-9.]+$/, '').trim();
-                }
-                
-                cleanName = cleanName.replace(/[\*\(\)\[\]\{\}]/g, '').trim();
-
-                const hasWarning = allergyCodes.some(code => activeAllergies.has(code));
-                const activeWarnings = allergyCodes.filter(code => activeAllergies.has(code)).map(code => ALLERGY_INFO[code]);
-
-                return { name: cleanName, allergyCodes, hasWarning, activeWarnings };
-            });
-        }
-
-        function switchTab(tabId) {
-            const btnWeekly = document.getElementById('tab-weekly');
-            const btnDaily = document.getElementById('tab-daily');
-            const viewWeekly = document.getElementById('view-weekly');
-            const viewDaily = document.getElementById('view-daily');
-
-            if (tabId === 'weekly') {
-                btnWeekly.className = "flex-1 py-2.5 text-xs md:text-sm font-extrabold rounded-xl bg-blue-600 text-white shadow-sm flex items-center justify-center space-x-1.5 transition-all tap-active";
-                btnDaily.className = "flex-1 py-2.5 text-xs md:text-sm font-extrabold text-slate-600 hover:bg-slate-100 rounded-xl flex items-center justify-center space-x-1.5 transition-all tap-active";
-                viewWeekly.classList.remove('hidden');
-                viewDaily.classList.add('hidden');
-                renderWeeklyView();
-            } else {
-                btnDaily.className = "flex-1 py-2.5 text-xs md:text-sm font-extrabold bg-blue-600 text-white shadow-sm flex items-center justify-center space-x-1.5 transition-all tap-active";
-                btnWeekly.className = "flex-1 py-2.5 text-xs md:text-sm font-extrabold text-slate-600 hover:bg-slate-100 rounded-xl flex items-center justify-center space-x-1.5 transition-all tap-active";
-                viewWeekly.classList.add('hidden');
-                viewDaily.classList.remove('hidden');
-                renderDailySelector();
-                renderDailyDetail();
-            }
-            lucide.createIcons();
+        // --- 렌더링 및 UI ---
+        function switchTab(tab) {
+            document.getElementById('view-weekly').classList.toggle('hidden', tab !== 'weekly');
+            document.getElementById('view-daily').classList.toggle('hidden', tab === 'weekly');
+            document.getElementById('tab-weekly').className = `flex-1 py-2.5 text-xs md:text-sm font-extrabold rounded-xl transition-all tap-active ${tab==='weekly' ? 'bg-blue-600 text-white shadow-sm' : 'text-slate-600 hover:bg-slate-100'}`;
+            document.getElementById('tab-daily').className = `flex-1 py-2.5 text-xs md:text-sm font-extrabold rounded-xl transition-all tap-active ${tab==='daily' ? 'bg-blue-600 text-white shadow-sm' : 'text-slate-600 hover:bg-slate-100'}`;
         }
 
         function renderWeeklyView() {
-            const container = document.getElementById('weekly-cards-grid');
-            container.innerHTML = '';
-            const weekdays = ["월", "화", "수", "목", "금"];
+            const c = document.getElementById('weekly-cards-grid'); c.innerHTML = '';
+            const wd = ["월", "화", "수", "목", "금"];
             const dates = Object.keys(scrapedMeals).sort();
+            const today = `${new Date('2026-05-18').getFullYear()}-${String(new Date('2026-05-18').getMonth()+1).padStart(2,'0')}-${String(new Date('2026-05-18').getDate()).padStart(2,'0')}`;
 
-            const todayStr = formatDateToYYYYMMDD(new Date('2026-05-18')).replace(/(\d{4})(\d{2})(\d{2})/, "$1-$2-$3");
-
-            if (dates.length === 0) {
-                container.innerHTML = `<div class="col-span-full py-16 text-center text-slate-400 font-bold">표시 가능한 학사 데이터가 없습니다.</div>`;
-                return;
-            }
-
-            dates.forEach((dateKey, idx) => {
-                const meal = scrapedMeals[dateKey];
-                const dayName = weekdays[idx % 5];
-                const processedItems = processMenu(meal.rawMenu);
-                const hasAnyWarning = processedItems.some(i => i.hasWarning);
-                const isToday = (dateKey === todayStr);
-
-                let dayColorClass = "bg-slate-100 text-slate-800";
-                if (dayName === "월") dayColorClass = "bg-blue-50 text-blue-700 border border-blue-100";
-                if (dayName === "금") dayColorClass = "bg-rose-50 text-rose-700 border border-rose-100";
-
-                const card = document.createElement('div');
-                card.className = `bg-white rounded-3xl border transition-all duration-300 flex flex-col justify-between overflow-hidden relative ${
-                    isToday ? 'border-blue-500 ring-2 ring-blue-500/10 shadow-md scale-[1.01]' :
-                    hasAnyWarning ? 'border-red-200 bg-red-50/10' : 'border-slate-200 hover:border-slate-300 shadow-sm'
-                }`;
-
-                let menuListHTML = processedItems.map(item => `
-                    <li class="py-2.5 border-b border-dashed border-slate-100 last:border-0 text-xs flex justify-between items-start gap-1">
-                        <span class="${item.hasWarning ? 'text-red-700 font-extrabold line-through decoration-red-400' : 'text-slate-700 font-semibold'}">${item.name}</span>
-                        ${item.hasWarning ? `<span class="bg-red-100 text-red-800 text-[8px] px-1.5 py-0.5 rounded font-extrabold shrink-0">⚠️ 차단</span>` : ''}
-                    </li>
-                `).join('');
-
-                card.innerHTML = `
-                    <div class="p-4 border-b border-slate-100 ${isToday ? 'bg-blue-50/20' : hasAnyWarning ? 'bg-red-50/20' : 'bg-slate-50/30'}">
-                        <div class="flex items-center justify-between">
-                            <span class="text-[10px] font-extrabold px-2.5 py-0.5 rounded-full ${dayColorClass}">${dayName}요일${isToday ? ' (오늘)' : ''}</span>
-                            <span class="text-[9px] text-slate-400 font-mono">${dateKey.substring(5)}</span>
+            dates.forEach((k, i) => {
+                const m = scrapedMeals[k];
+                const items = m.rawMenu.split(',').map(s => {
+                    const n = s.trim().replace(/[0-9.]+$/, '').replace(/[\*\(\)\[\]\{\}]/g, '').trim();
+                    const codes = (s.match(/[0-9.]+$/)||[""])[0].split('.').map(x=>parseInt(x)).filter(x=>!isNaN(x));
+                    return { name: n, warn: codes.some(c => activeAllergies.has(c)) };
+                });
+                const isWarn = items.some(x=>x.warn), isToday = k===today;
+                
+                c.innerHTML += `
+                    <div class="bg-white rounded-3xl border transition-all flex flex-col justify-between overflow-hidden ${isToday ? 'border-blue-500 ring-2 ring-blue-500/10 scale-[1.01]' : isWarn ? 'border-red-200 bg-red-50/10' : 'border-slate-200 shadow-sm'}">
+                        <div class="p-4 border-b border-slate-100 ${isToday?'bg-blue-50/20':isWarn?'bg-red-50/20':'bg-slate-50/30'}">
+                            <div class="flex items-center justify-between"><span class="text-[10px] font-extrabold px-2.5 py-0.5 rounded-full ${wd[i%5]==="월"?'bg-blue-50 text-blue-700':wd[i%5]==="금"?'bg-rose-50 text-rose-700':'bg-slate-100 text-slate-800'}">${wd[i%5]}요일${isToday?' (오늘)':''}</span><span class="text-[9px] text-slate-400 font-mono">${k.substring(5)}</span></div>
+                            <p class="text-xs text-slate-800 mt-2 font-black flex items-center"><i data-lucide="flame" class="w-3.5 h-3.5 text-orange-500 mr-1"></i>${m.calories} kcal</p>
                         </div>
-                        <p class="text-xs text-slate-800 mt-2 font-black flex items-center">
-                            <i data-lucide="flame" class="w-3.5 h-3.5 text-orange-500 mr-1 shrink-0"></i>
-                            ${meal.calories} kcal
-                        </p>
-                    </div>
-                    <div class="p-4 flex-1">
-                        <ul class="divide-y divide-slate-100">${menuListHTML}</ul>
-                    </div>
-                    <div class="p-2 bg-slate-50 border-t border-slate-100">
-                        <button onclick="selectDateAndGoToDetail('${dateKey}')" class="text-[11px] font-extrabold text-blue-600 hover:text-blue-800 hover:bg-white rounded-xl py-2 transition-all w-full flex items-center justify-center shadow-sm tap-active">
-                            <span>상세 성분 피드백</span>
-                            <i data-lucide="chevron-right" class="w-3.5 h-3.5 ml-0.5"></i>
-                        </button>
-                    </div>
-                `;
-                container.appendChild(card);
-            });
-            lucide.createIcons();
+                        <ul class="p-4 flex-1 divide-y divide-slate-100">${items.map(x=>`<li class="py-2.5 text-xs flex justify-between gap-1"><span class="${x.warn?'text-red-700 font-extrabold line-through':'text-slate-700 font-semibold'}">${x.name}</span>${x.warn?'<span class="bg-red-100 text-red-800 text-[8px] px-1.5 py-0.5 rounded font-extrabold">차단</span>':''}</li>`).join('')}</ul>
+                        <div class="p-2 border-t border-slate-100 bg-slate-50"><button onclick="currentSelectedDate='${k}';switchTab('daily');renderDailySelector();renderDailyDetail();" class="w-full py-2 text-[11px] font-extrabold text-blue-600 bg-white rounded-xl shadow-sm tap-active">상세 & AI 코칭</button></div>
+                    </div>`;
+            }); lucide.createIcons();
         }
 
         function renderDailySelector() {
-            const container = document.getElementById('daily-day-selector');
-            container.innerHTML = '';
-            
-            const dates = Object.keys(scrapedMeals).sort();
-            const weekdays = ["월", "화", "수", "목", "금"];
-
-            dates.forEach((dateKey, idx) => {
-                const dayLabel = weekdays[idx % 5];
-                const isSelected = currentSelectedDate === dateKey;
-                
-                const btn = document.createElement('button');
-                btn.className = `px-3 py-1.5 text-xs font-bold rounded-xl transition-all tap-active ${
-                    isSelected ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-500 hover:text-slate-800'
-                }`;
-                btn.onclick = () => {
-                    currentSelectedDate = dateKey;
-                    renderDailySelector();
-                    renderDailyDetail();
-                    document.getElementById('ai-response-box').innerHTML = `
-                        <p class="text-slate-400 text-center py-12">우측 상단 [분석 실행] 버튼을 클릭하시면, 해당 식단의 성장 촉진 비율 및 최적의 대체 저녁 레시피를 실시간 인공지능 분석하여 로드합니다.</p>
-                    `;
-                };
-                btn.textContent = `${dayLabel}`;
-                container.appendChild(btn);
+            const c = document.getElementById('daily-day-selector'); c.innerHTML = '';
+            Object.keys(scrapedMeals).sort().forEach((k, i) => {
+                c.innerHTML += `<button onclick="currentSelectedDate='${k}';renderDailySelector();renderDailyDetail();document.getElementById('ai-response-box').innerHTML='<p class=\\'text-slate-400 text-center py-12\\'>AI 분석을 요청하세요.</p>';" class="px-3 py-1.5 text-xs font-bold rounded-xl transition-all tap-active ${currentSelectedDate===k?'bg-white text-blue-600 shadow-sm':'text-slate-500 hover:text-slate-800'}">${["월","화","수","목","금"][i%5]}</button>`;
             });
         }
 
         function renderDailyDetail() {
-            const container = document.getElementById('daily-detail-card');
-            container.innerHTML = '';
-            if (!currentSelectedDate || !scrapedMeals[currentSelectedDate]) {
-                container.innerHTML = `<p class="text-center py-12 text-slate-400">데이터를 세팅 중입니다.</p>`;
-                return;
-            }
-
-            const meal = scrapedMeals[currentSelectedDate];
-            const processedItems = processMenu(meal.rawMenu);
+            const m = scrapedMeals[currentSelectedDate];
+            if(!m) return;
+            const nut = m.nutrition, tot = nut.carbo+nut.protein+nut.fat;
+            const cP = tot>0?Math.round(nut.carbo/tot*100):0, pP = tot>0?Math.round(nut.protein/tot*100):0, fP = tot>0?Math.round(nut.fat/tot*100):0;
             
-            const menuListHTML = processedItems.map(item => `
-                <div class="flex justify-between items-center p-3 rounded-2xl border border-slate-100 transition duration-150 ${item.hasWarning ? 'bg-red-50/40 border-red-100' : 'bg-slate-50/30'}">
-                    <div class="flex items-center space-x-3">
-                        <div class="w-2.5 h-2.5 rounded-full ${item.hasWarning ? 'bg-red-500' : 'bg-blue-500'}"></div>
-                        <span class="text-xs md:text-sm font-extrabold ${item.hasWarning ? 'text-red-700 line-through' : 'text-slate-700'}">${item.name}</span>
-                    </div>
-                    <div class="flex items-center space-x-1.5">
-                        ${item.allergyCodes.length > 0 ? `<span class="text-[9px] text-slate-400 border border-slate-200/60 px-1.5 py-0.5 rounded-lg bg-white font-mono">코드: ${item.allergyCodes.join(',')}</span>` : ''}
-                        ${item.hasWarning ? `<span class="bg-red-600 text-white text-[9px] px-2 py-0.5 rounded-full font-black">필터제한</span>` : ''}
-                    </div>
-                </div>
-            `).join('');
+            const list = m.rawMenu.split(',').map(s => {
+                const n = s.trim().replace(/[0-9.]+$/, '').replace(/[\*\(\)\[\]\{\}]/g, '').trim();
+                const codes = (s.match(/[0-9.]+$/)||[""])[0].split('.').map(x=>parseInt(x)).filter(x=>!isNaN(x));
+                const warn = codes.some(c => activeAllergies.has(c));
+                return `<div class="flex justify-between items-center p-3 rounded-2xl border ${warn?'bg-red-50/40 border-red-100':'bg-slate-50/30 border-slate-100'}"><div class="flex items-center space-x-3"><div class="w-2.5 h-2.5 rounded-full ${warn?'bg-red-500':'bg-blue-500'}"></div><span class="text-xs md:text-sm font-extrabold ${warn?'text-red-700 line-through':'text-slate-700'}">${n}</span></div><div class="flex space-x-1.5">${codes.length>0?`<span class="text-[9px] text-slate-400 border px-1.5 py-0.5 rounded-lg bg-white">코드: ${codes.join(',')}</span>`:''}${warn?'<span class="bg-red-600 text-white text-[9px] px-2 py-0.5 rounded-full font-black">필터</span>':''}</div></div>`;
+            }).join('');
 
-            const nut = meal.nutrition;
-            const totalNut = nut.carbo + nut.protein + nut.fat;
-            const carboPct = totalNut > 0 ? Math.round((nut.carbo / totalNut) * 100) : 0;
-            const proteinPct = totalNut > 0 ? Math.round((nut.protein / totalNut) * 100) : 0;
-            const fatPct = totalNut > 0 ? Math.round((nut.fat / totalNut) * 100) : 0;
-
-            container.innerHTML = `
+            document.getElementById('daily-detail-card').innerHTML = `
                 <div class="space-y-4">
-                    <div>
-                        <div class="flex items-center justify-between">
-                            <span class="text-sm md:text-base font-extrabold text-slate-900">${currentSelectedDate}</span>
-                            <span class="text-xs md:text-sm font-extrabold text-blue-600 bg-blue-50 px-3 py-1 rounded-xl border border-blue-100">${meal.calories} kcal</span>
-                        </div>
-                    </div>
-                    <div class="space-y-2 overflow-y-auto max-h-[180px] pr-2 custom-scrollbar">
-                        ${menuListHTML}
-                    </div>
+                    <div class="flex items-center justify-between"><span class="text-sm font-extrabold text-slate-900">${currentSelectedDate}</span><span class="text-xs font-extrabold text-blue-600 bg-blue-50 px-3 py-1 rounded-xl border border-blue-100">${m.calories} kcal</span></div>
+                    <div class="space-y-2 max-h-[180px] overflow-y-auto custom-scrollbar pr-2">${list}</div>
                 </div>
-
                 <div class="bg-slate-50 rounded-2xl p-4 border border-slate-100 mt-4">
-                    <h4 class="text-xs font-bold text-slate-800 mb-2 flex items-center">
-                        <i data-lucide="pulse" class="w-4 h-4 text-indigo-500 mr-1.5"></i>
-                        성일고 대사 영양 배율 분석
-                    </h4>
-                    
-                    <div class="h-4 w-full bg-slate-200 rounded-full flex overflow-hidden shadow-inner my-3 text-[9px] text-slate-900 font-extrabold">
-                        <div style="width: ${carboPct}%" class="bg-amber-400 flex items-center justify-center" title="탄수화물">탄 ${carboPct}%</div>
-                        <div style="width: ${proteinPct}%" class="bg-emerald-400 flex items-center justify-center text-white" title="단백질">단 ${proteinPct}%</div>
-                        <div style="width: ${fatPct}%" class="bg-rose-400 flex items-center justify-center" title="지방">지 ${fatPct}%</div>
-                    </div>
-
-                    <div class="grid grid-cols-3 gap-2 text-center">
-                        <div class="bg-white p-2 rounded-xl border border-slate-100 shadow-sm">
-                            <span class="text-[9px] text-slate-400 block">탄수화물</span>
-                            <span class="text-xs font-bold text-slate-800">${nut.carbo}g</span>
-                        </div>
-                        <div class="bg-white p-2 rounded-xl border border-slate-100 shadow-sm">
-                            <span class="text-[9px] text-slate-400 block">단백질</span>
-                            <span class="text-xs font-bold text-slate-800">${nut.protein}g</span>
-                        </div>
-                        <div class="bg-white p-2 rounded-xl border border-slate-100 shadow-sm">
-                            <span class="text-[9px] text-slate-400 block">지방</span>
-                            <span class="text-xs font-bold text-slate-800">${nut.fat}g</span>
-                        </div>
-                    </div>
-                </div>
-            `;
+                    <h4 class="text-xs font-bold text-slate-800 mb-2 flex items-center"><i data-lucide="pulse" class="w-4 h-4 text-indigo-500 mr-1.5"></i>영양 배율 현황</h4>
+                    <div class="h-4 w-full bg-slate-200 rounded-full flex overflow-hidden my-3 text-[9px] font-extrabold"><div style="width:${cP}%" class="bg-amber-400 flex items-center justify-center">탄 ${cP}%</div><div style="width:${pP}%" class="bg-emerald-400 flex items-center justify-center text-white">단 ${pP}%</div><div style="width:${fP}%" class="bg-rose-400 flex items-center justify-center">지 ${fP}%</div></div>
+                    <div class="grid grid-cols-3 gap-2 text-center text-xs font-bold"><div class="bg-white p-2 rounded-xl shadow-sm"><span class="text-[9px] text-slate-400 block font-normal">탄수화물</span>${nut.carbo}g</div><div class="bg-white p-2 rounded-xl shadow-sm"><span class="text-[9px] text-slate-400 block font-normal">단백질</span>${nut.protein}g</div><div class="bg-white p-2 rounded-xl shadow-sm"><span class="text-[9px] text-slate-400 block font-normal">지방</span>${nut.fat}g</div></div>
+                </div>`;
             lucide.createIcons();
         }
 
-        function selectDateAndGoToDetail(dateKey) {
-            currentSelectedDate = dateKey;
-            renderDailySelector();
-            switchTab('daily');
+        // --- 기타 기능 (스와이프, AI) ---
+        function navigateWeek(d) { currentTargetDate.setDate(currentTargetDate.getDate() + d); fetchNeisTodayData(); }
+        function resetToToday() { currentTargetDate = new Date('2026-05-18'); fetchNeisTodayData(); }
+        function setupSwipeGestures() {
+            const z = document.getElementById('touch-swipe-zone');
+            z.addEventListener('touchstart', e => touchStartX = e.changedTouches[0].screenX, {passive:true});
+            z.addEventListener('touchend', e => { if(Math.abs(e.changedTouches[0].screenX - touchStartX) > 100) navigateWeek(e.changedTouches[0].screenX > touchStartX ? -7 : 7); }, {passive:true});
         }
-
-        function renderAllergySelectors() {
-            const container = document.getElementById('allergy-container');
-            container.innerHTML = '';
-            
-            Object.entries(ALLERGY_INFO).forEach(([code, name]) => {
-                const numCode = parseInt(code);
-                const isActive = activeAllergies.has(numCode);
-                
-                const btn = document.createElement('button');
-                btn.className = `px-2 py-1.5 rounded-xl text-[10px] font-bold border transition text-left flex justify-between items-center tap-active ${
-                    isActive ? 'bg-red-50 border-red-200 text-red-700 font-black' : 'bg-slate-50 border-slate-200/60 text-slate-500 hover:bg-slate-100'
-                }`;
-                btn.onclick = () => {
-                    isActive ? activeAllergies.delete(numCode) : activeAllergies.add(numCode);
-                    saveAllergiesToStorage();
-                    renderAllergySelectors();
-                    renderWeeklyView();
-                    renderDailyDetail(); 
-                };
-                btn.innerHTML = `<span>${name}</span> ${isActive ? '<div class="w-1.5 h-1.5 bg-red-500 rounded-full"></div>' : ''}`;
-                container.appendChild(btn);
-            });
-        }
-
-        function applyPreset(presetType) {
-            const list = PRESETS[presetType];
-            if (list) {
-                list.forEach(code => activeAllergies.add(code));
-                saveAllergiesToStorage();
-                renderAllergySelectors();
-                renderWeeklyView();
-                renderDailyDetail();
-                showToast("선택하신 특수 알러지 집중 필터링이 즉각 주입되었습니다.");
-            }
-        }
-
-        function resetAllergyFilters() {
-            activeAllergies.clear();
-            saveAllergiesToStorage();
-            renderAllergySelectors();
-            renderWeeklyView();
-            renderDailyDetail();
-            showToast("수동 알레르기 제어가 원격 초기화되었습니다.");
-        }
-
-        function saveAllergiesToStorage() {
-            localStorage.setItem('seongil_allergy_set', JSON.stringify([...activeAllergies]));
-        }
-
-        function loadAllergiesFromStorage() {
-            const saved = localStorage.getItem('seongil_allergy_set');
-            if (saved) {
-                activeAllergies = new Set(JSON.parse(saved));
-            }
-        }
-
-        function shareTodayMenu() {
-            if (!currentSelectedDate || !scrapedMeals[currentSelectedDate]) return;
-            const meal = scrapedMeals[currentSelectedDate];
-            const cleanText = `[성일고 스마트 급식실]\n날짜: ${currentSelectedDate}\n오늘 메뉴: ${meal.rawMenu.replace(/\d+\./g, '')}\n열량: ${meal.calories} kcal입니다!`;
-            
-            const tempInput = document.createElement("textarea");
-            tempInput.value = cleanText;
-            document.body.appendChild(tempInput);
-            tempInput.select();
-            document.execCommand('copy');
-            document.body.removeChild(tempInput);
-            
-            showToast("오늘 자 급식 텍스트가 정밀 복사되었습니다.");
-        }
-
-        function shareWeeklySummary() {
-            let summary = "[성일고등학교 스마트 급식 주간 요약]\n";
-            Object.keys(scrapedMeals).sort().forEach(key => {
-                const meal = scrapedMeals[key];
-                summary += `\n📅 ${key}: ${meal.rawMenu.replace(/\d+\./g, '')} (${meal.calories} kcal)`;
-            });
-
-            const tempInput = document.createElement("textarea");
-            tempInput.value = summary;
-            document.body.appendChild(tempInput);
-            tempInput.select();
-            document.execCommand('copy');
-            document.body.removeChild(tempInput);
-            
-            showToast("금주 전체 학급 급식 식단표가 복사되었습니다.");
-        }
-
-        // ================= GEMINI AI REAL-TIME COACHING =================
-
+        
         async function triggerAiCoaching() {
-            const aiBox = document.getElementById('ai-response-box');
-            if (!currentSelectedDate || !scrapedMeals[currentSelectedDate]) {
-                showToast("먼저 날짜 데이터 셋을 확보해 주세요.");
-                return;
-            }
-
-            const meal = scrapedMeals[currentSelectedDate];
-            aiBox.innerHTML = `
-                <div class="flex flex-col items-center justify-center py-16 space-y-3">
-                    <div class="loader"></div>
-                    <p class="text-[10px] text-indigo-300 animate-pulse font-bold">성일고 급식 데이터 Gemini 2.5 신경망 연산 가동 중...</p>
-                </div>
-            `;
-
-            const systemPrompt = `You are an expert high school nutritionist advising students. Analyze the dinner compatibility, memory-booster foods, and nutritional balance based on their lunch menu. Keep it concise, friendly, formatted strictly in HTML using unordered lists and span tags. Max 150 words.`;
-
-            const userQuery = `성일고 오늘 점심 급식:
-            - 날짜: ${currentSelectedDate}
-            - 식단: ${meal.rawMenu}
-            - 칼로리: ${meal.calories} kcal
-            - 영양소: 탄수화물 ${meal.nutrition.carbo}g, 단백질 ${meal.nutrition.protein}g, 지방 ${meal.nutrition.fat}g
+            const box = document.getElementById('ai-response-box');
+            if(!scrapedMeals[currentSelectedDate]) return;
+            box.innerHTML = `<div class="flex flex-col items-center py-16 space-y-3"><div class="loader"></div><p class="text-[10px] text-indigo-300 font-bold animate-pulse">Gemini Flash 모델 연산 중...</p></div>`;
             
-            이 점심을 먹은 학생들의 집중력을 보완할 수 있는 오후 뇌기능 활성화 팁과 오늘 저녁식사 추천 밥상 꿀조합을 한글로 분석해줘.`;
-
-            const resultText = await callGeminiWithRetry(userQuery, systemPrompt);
-            if (resultText) {
-                aiBox.innerHTML = `
-                    <div class="space-y-3 text-indigo-100 text-[11px] leading-relaxed animate-fade-in">
-                        ${resultText}
-                    </div>
-                `;
-            } else {
-                aiBox.innerHTML = `
-                    <p class="text-center py-10 text-rose-300">실시간 Gemini API 수신 대기 시간이 초과되었습니다. 잠시 후 새로고침해 보세요.</p>
-                `;
-            }
+            try {
+                const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`, {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        contents: [{ parts: [{ text: `성일고 오늘 점심: ${scrapedMeals[currentSelectedDate].rawMenu} (${scrapedMeals[currentSelectedDate].calories}kcal). 집중력 보완 및 추천 저녁 식단 짧게 분석해줘.` }] }],
+                        systemInstruction: { parts: [{ text: `You are a high school nutritionist. Suggest study focus tips and dinner based on lunch. HTML lists only. Max 100 words in Korean.` }] }
+                    })
+                });
+                const data = await res.json();
+                box.innerHTML = `<div class="text-indigo-100 text-[11px] leading-relaxed animate-fade-in">${data.candidates[0].content.parts[0].text}</div>`;
+            } catch(e) { box.innerHTML = `<p class="text-center py-10 text-rose-300">네트워크 수신 에러. 잠시 후 시도하세요.</p>`; }
         }
 
-        async function callGeminiWithRetry(query, systemInstruction, retries = 5, delay = 1000) {
-            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
-            const payload = {
-                contents: [{ parts: [{ text: query }] }],
-                systemInstruction: { parts: [{ text: systemInstruction }] }
-            };
-
-            for (let i = 0; i < retries; i++) {
-                try {
-                    const response = await fetch(url, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(payload)
-                    });
-
-                    if (response.ok) {
-                        const data = await response.json();
-                        return data.candidates?.[0]?.content?.parts?.[0]?.text;
-                    }
-                } catch (error) {
-                    // Retry
-                }
-                await new Promise(resolve => setTimeout(resolve, delay));
-                delay *= 2;
-            }
-            return null;
+        function clearLocalStorageCache() { localStorage.clear(); location.reload(); }
+        function renderAllergySelectors() {
+            const c = document.getElementById('allergy-container'); c.innerHTML = '';
+            Object.entries(ALLERGY_INFO).forEach(([code, name]) => {
+                const isActive = activeAllergies.has(parseInt(code));
+                c.innerHTML += `<button onclick="activeAllergies.${isActive?'delete':'add'}(${code});localStorage.setItem('seongil_allergy_set',JSON.stringify([...activeAllergies]));renderAllergySelectors();renderWeeklyView();renderDailyDetail();" class="px-2 py-1.5 rounded-xl text-[10px] font-bold border transition flex justify-between items-center tap-active ${isActive?'bg-red-50 border-red-200 text-red-700':'bg-slate-50 border-slate-200/60 text-slate-500'}"><span>${name}</span>${isActive?'<div class="w-1.5 h-1.5 bg-red-500 rounded-full"></div>':''}</button>`;
+            });
+        }
+        function applyPreset(p) { PRESETS[p].forEach(c=>activeAllergies.add(c)); renderAllergySelectors(); renderWeeklyView(); renderDailyDetail(); showToast("필터 반영 완료"); }
+        function resetAllergyFilters() { activeAllergies.clear(); renderAllergySelectors(); renderWeeklyView(); renderDailyDetail(); }
+        function loadAllergiesFromStorage() { const s = localStorage.getItem('seongil_allergy_set'); if(s) activeAllergies = new Set(JSON.parse(s)); }
+        function triggerPwaInstall() { deferredPrompt ? deferredPrompt.prompt() : showToast("브라우저 설정에서 [홈 화면에 추가]를 눌러주세요."); }
+        function shareTodayMenu() {
+            const t = document.createElement('textarea'); t.value = `[성일고 급식]\n${currentSelectedDate}\n${scrapedMeals[currentSelectedDate].rawMenu.replace(/\d+\./g,'')} (${scrapedMeals[currentSelectedDate].calories}kcal)`;
+            document.body.appendChild(t); t.select(); document.execCommand('copy'); t.remove(); showToast("복사되었습니다.");
+        }
+        function shareWeeklySummary() {
+            let s = "[성일고 이번 주 식단]\n"; Object.keys(scrapedMeals).sort().forEach(k => s += `\n📅 ${k}: ${scrapedMeals[k].rawMenu.replace(/\d+\./g,'')} (${scrapedMeals[k].calories}kcal)`);
+            const t = document.createElement('textarea'); t.value = s; document.body.appendChild(t); t.select(); document.execCommand('copy'); t.remove(); showToast("주간 식단이 복사되었습니다.");
         }
     </script>
 </body>
 </html>
+
 
 ```
