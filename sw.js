@@ -1,4 +1,3 @@
-
 const CACHE_NAME = 'seongil-smart-meal-v3';
 
 self.addEventListener('install', function(event) {
