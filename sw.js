@@ -10,8 +10,7 @@ self.addEventListener('activate', function(event) {
 });
 
 async function fetchAndShowMealNotification() {
-    // 앱이 꺼져있을 때도 실시간 시스템 시간으로 날짜를 계산
-    // *시뮬레이션을 위해 2026-05-18을 기준으로 사용했습니다. (실 배포시 new Date() 사용)
+    
     const now = new Date('2026-05-18');
     const dayOfWeek = now.getDay();
     let targetDate = new Date(now);
@@ -67,7 +66,7 @@ self.addEventListener('push', function(event) {
 
 self.addEventListener('message', function(event) {
     if (event.data && event.data.type === 'SEND_TEST_ALARM') {
-        // 만약 index.html에서 좀비 워커 파괴용 텍스트를 보냈다면 그 텍스트를 띄워줍니다.
+        
         if (event.data.title && event.data.body) {
             self.registration.showNotification(event.data.title, {
                 body: event.data.body,
@@ -75,7 +74,7 @@ self.addEventListener('message', function(event) {
                 vibrate: [200, 50, 200]
             });
         } else {
-            // 그게 아니면 스스로 교육부 서버에서 추출합니다.
+            
             event.waitUntil(fetchAndShowMealNotification());
         }
     }
@@ -156,5 +155,5 @@ self.addEventListener('notificationclick', function(event) {
     );
 });
 
-
+```
 
