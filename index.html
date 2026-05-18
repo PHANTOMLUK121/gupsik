@@ -1,4 +1,4 @@
-```html
+
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -20,17 +20,13 @@
         .custom-scrollbar::-webkit-scrollbar { width: 4px; height: 4px; }
         .custom-scrollbar::-webkit-scrollbar-track { background: #f8fafc; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 999px; }
-        .loader {
-            border: 2px solid #e2e8f0; border-radius: 50%; border-top: 2px solid #2563eb; width: 16px; height: 16px;
-            animation: spin 0.8s cubic-bezier(0.5, 0.1, 0.4, 0.9) infinite;
-        }
+        .loader { border: 2px solid #e2e8f0; border-radius: 50%; border-top: 2px solid #2563eb; width: 16px; height: 16px; animation: spin 0.8s cubic-bezier(0.5, 0.1, 0.4, 0.9) infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         .tap-active:active { transform: scale(0.97); transition: transform 0.1s ease; }
     </style>
 </head>
 <body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col antialiased pb-20 md:pb-0">
 
-    <!-- 상단 헤더 -->
     <header class="bg-white/90 border-b border-slate-200/80 sticky top-0 z-40 shadow-sm backdrop-blur-md">
         <div class="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
             <div class="flex items-center space-x-3">
@@ -40,9 +36,9 @@
                 <div>
                     <h1 class="text-base font-extrabold text-slate-900 leading-tight flex items-center gap-1.5">
                         성일고 스마트 급식실
-                        <span class="text-[9px] bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full font-bold border border-blue-200">PRO</span>
+                        <span class="text-[9px] bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full font-bold border border-blue-200">MAX</span>
                     </h1>
-                    <p class="text-[10px] text-slate-400">오프라인 캐싱, 실시간 알림 & AI 영양 코칭 탑재</p>
+                    <p class="text-[10px] text-slate-400">오프라인 백그라운드 식단 추출 탑재</p>
                 </div>
             </div>
             <div id="status-indicator" class="text-xs">
@@ -51,7 +47,6 @@
         </div>
     </header>
 
-    <!-- 공통 알림 토스트 -->
     <div id="custom-toast" class="fixed top-20 left-1/2 -translate-x-1/2 z-50 transform translate-y-[-100px] opacity-0 transition-all duration-300 pointer-events-none max-w-[90%] w-80">
         <div class="bg-slate-900/95 backdrop-blur-md text-white px-4 py-3 rounded-2xl shadow-xl flex items-center space-x-3 border border-slate-700/50">
             <i data-lucide="bell" class="w-4 h-4 text-amber-400 shrink-0"></i>
@@ -59,25 +54,21 @@
         </div>
     </div>
 
-    <!-- 앱 설치 유도 배너 -->
     <div id="install-banner" class="bg-blue-600 text-white px-4 py-2.5 text-xs font-bold flex justify-between items-center hidden">
-        <span class="flex items-center gap-1.5"><i data-lucide="smartphone" class="w-4 h-4"></i>홈 화면에 추가해야 백그라운드 알람이 옵니다!</span>
+        <span class="flex items-center gap-1.5"><i data-lucide="smartphone" class="w-4 h-4"></i>앱으로 설치해야 알람이 옵니다!</span>
         <button onclick="triggerPwaInstall()" class="bg-white text-blue-600 px-3 py-1 rounded-lg text-[10px] shadow">설치</button>
     </div>
 
     <main class="flex-1 max-w-6xl w-full mx-auto p-4 grid grid-cols-1 lg:grid-cols-12 gap-6" id="touch-swipe-zone">
         
-        <!-- 좌측 패널 (알람, 설정, 필터) -->
         <div class="lg:col-span-4 space-y-5">
-            
-            <!-- 알림 제어판 -->
             <div class="bg-gradient-to-br from-slate-900 to-blue-950 text-white p-5 rounded-3xl border border-slate-800 shadow-xl space-y-4">
                 <div class="flex items-center justify-between border-b border-slate-800 pb-3">
                     <div class="flex items-center space-x-2">
                         <div class="p-1.5 bg-blue-500/20 rounded-xl border border-blue-500/30"><i data-lucide="alarm-clock" class="w-4 h-4 text-blue-400"></i></div>
                         <div>
                             <h3 class="text-xs font-extrabold text-white">매일 아침 급식 알람</h3>
-                            <p class="text-[9px] text-slate-400">당일 식단 스마트폰 푸시 연동</p>
+                            <p class="text-[9px] text-slate-400">평일(오늘), 주말(다음주 월) 자동 매핑</p>
                         </div>
                     </div>
                     <span id="alarm-badge" class="text-[9px] bg-rose-500/20 text-rose-300 px-2 py-0.5 rounded-full font-bold border border-rose-500/30">알림 미신청</span>
@@ -87,14 +78,15 @@
                         <i data-lucide="bell" class="w-4 h-4"></i>
                         <span>1단계: 알림 권한 허용하기</span>
                     </button>
-                    <button onclick="sendTestNotificationDirectly()" class="w-full py-2 bg-slate-800/80 hover:bg-slate-800 text-slate-300 border border-slate-700/60 font-semibold rounded-xl text-[10px] transition-all flex items-center justify-center space-x-1.5 tap-active">
+                    <!-- 트리거 방식 변경됨 -->
+                    <button onclick="triggerBackgroundTest()" class="w-full py-2 bg-slate-800/80 hover:bg-slate-800 text-slate-300 border border-slate-700/60 font-semibold rounded-xl text-[10px] transition-all flex items-center justify-center space-x-1.5 tap-active">
                         <i data-lucide="smartphone" class="w-3.5 h-3.5 text-emerald-400"></i>
-                        <span>2단계: 3초 뒤 당일 식단 알림 테스트</span>
+                        <span>2단계: 3초 뒤 백그라운드 자동추출 테스트</span>
                     </button>
                 </div>
             </div>
 
-            <!-- 캘린더 네비게이션 -->
+            <!-- 네비게이션 & 필터 (기존 동일) -->
             <div class="bg-white p-5 rounded-3xl border border-slate-200/80 shadow-sm space-y-4">
                 <div class="flex items-center justify-between">
                     <span class="text-[11px] font-extrabold text-blue-600 uppercase tracking-wider block">조회 기간 설정</span>
@@ -110,12 +102,10 @@
                 </div>
             </div>
 
-            <!-- 알레르기 안심 필터 -->
             <div class="bg-white p-5 rounded-3xl border border-slate-200/80 shadow-sm space-y-4">
                 <div class="flex items-center justify-between border-b border-slate-100 pb-3">
                     <div class="flex items-center space-x-2 text-slate-900 font-extrabold text-sm">
-                        <i data-lucide="shield-alert" class="w-4 h-4 text-emerald-500"></i>
-                        <span>알레르기 필터링</span>
+                        <i data-lucide="shield-alert" class="w-4 h-4 text-emerald-500"></i><span>알레르기 필터링</span>
                     </div>
                     <button onclick="resetAllergyFilters()" class="text-xs text-slate-400 hover:text-slate-600 font-bold">초기화</button>
                 </div>
@@ -127,8 +117,7 @@
                 </div>
                 <div class="grid grid-cols-3 gap-1 pt-3 border-t border-slate-100" id="allergy-container"></div>
             </div>
-
-            <!-- 텔레메트리 (개발/로그) -->
+            
             <div class="bg-slate-900 text-slate-300 p-4 rounded-3xl shadow-md space-y-3">
                 <div class="flex items-center justify-between border-b border-slate-800 pb-2">
                     <div class="flex items-center space-x-2">
@@ -136,7 +125,7 @@
                         <span class="font-bold text-[10px] uppercase tracking-wider text-slate-400">TELEMETRY & CACHE</span>
                     </div>
                     <button onclick="clearLocalStorageCache()" class="text-[10px] text-red-400 hover:text-red-300 font-bold flex items-center gap-1 tap-active">
-                        <i data-lucide="trash-2" class="w-3 h-3"></i> 캐시 비우기
+                        <i data-lucide="trash-2" class="w-3 h-3"></i> 비우기
                     </button>
                 </div>
                 <div id="log-container" class="text-[9px] font-mono space-y-1 h-24 overflow-y-auto text-slate-400 custom-scrollbar">
@@ -145,20 +134,13 @@
             </div>
         </div>
 
-        <!-- 우측 패널 (메인 식단 & AI) -->
+        <!-- 우측 뷰 영역 -->
         <div class="lg:col-span-8 space-y-5">
-            
-            <!-- 탭 전환 -->
             <div class="bg-white p-1.5 rounded-2xl border border-slate-200 flex space-x-1 shadow-sm">
-                <button onclick="switchTab('weekly')" id="tab-weekly" class="flex-1 py-2.5 text-xs md:text-sm font-extrabold rounded-xl bg-blue-600 text-white shadow-sm flex items-center justify-center space-x-1.5 transition-all tap-active">
-                    <i data-lucide="layout-grid" class="w-4 h-4"></i><span>주간 식단표</span>
-                </button>
-                <button onclick="switchTab('daily')" id="tab-daily" class="flex-1 py-2.5 text-xs md:text-sm font-extrabold text-slate-600 hover:bg-slate-100 rounded-xl flex items-center justify-center space-x-1.5 transition-all tap-active">
-                    <i data-lucide="sparkles" class="w-4 h-4"></i><span>상세 AI 분석</span>
-                </button>
+                <button onclick="switchTab('weekly')" id="tab-weekly" class="flex-1 py-2.5 text-xs md:text-sm font-extrabold rounded-xl bg-blue-600 text-white shadow-sm flex items-center justify-center space-x-1.5 transition-all tap-active"><i data-lucide="layout-grid" class="w-4 h-4"></i><span>주간 식단표</span></button>
+                <button onclick="switchTab('daily')" id="tab-daily" class="flex-1 py-2.5 text-xs md:text-sm font-extrabold text-slate-600 hover:bg-slate-100 rounded-xl flex items-center justify-center space-x-1.5 transition-all tap-active"><i data-lucide="sparkles" class="w-4 h-4"></i><span>상세 AI 분석</span></button>
             </div>
 
-            <!-- 주간 식단 뷰 -->
             <div id="view-weekly" class="space-y-4">
                 <div class="flex items-center justify-between">
                     <h3 class="text-sm font-extrabold text-slate-800 flex items-center gap-1.5">
@@ -173,7 +155,6 @@
                 </div>
             </div>
 
-            <!-- 상세 AI 뷰 -->
             <div id="view-daily" class="hidden space-y-4">
                 <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                     <h3 class="text-sm font-extrabold text-slate-800 flex items-center gap-1.5">
@@ -181,12 +162,8 @@
                     </h3>
                     <div class="flex space-x-1 bg-slate-200/60 p-1 rounded-xl border border-slate-300/40" id="daily-day-selector"></div>
                 </div>
-
                 <div class="grid grid-cols-1 md:grid-cols-12 gap-5">
-                    <!-- 상세 메뉴 및 영양 바 -->
                     <div class="md:col-span-7 bg-white rounded-3xl border border-slate-200/80 p-6 shadow-sm flex flex-col justify-between" id="daily-detail-card"></div>
-
-                    <!-- AI 비서 봇 -->
                     <div class="md:col-span-5 bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 text-white rounded-3xl p-6 shadow-md flex flex-col justify-between relative overflow-hidden">
                         <div class="absolute -right-10 -bottom-10 opacity-5 pointer-events-none"><i data-lucide="brain" class="w-44 h-44 text-white"></i></div>
                         <div class="relative z-10 space-y-4">
@@ -195,9 +172,7 @@
                                     <div class="p-2 bg-indigo-600/30 border border-indigo-500/40 rounded-xl"><i data-lucide="bot" class="w-4 h-4 text-emerald-400"></i></div>
                                     <div><h4 class="text-xs font-extrabold text-white">AI 맞춤 급식 피드백</h4><p class="text-[9px] text-indigo-300/80">Gemini 2.5 Flash 엔진</p></div>
                                 </div>
-                                <button onclick="triggerAiCoaching()" class="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white text-[10px] font-bold rounded-xl transition flex items-center gap-1 shadow-md tap-active">
-                                    <i data-lucide="wand-2" class="w-3.5 h-3.5"></i> 분석 실행
-                                </button>
+                                <button onclick="triggerAiCoaching()" class="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white text-[10px] font-bold rounded-xl transition flex items-center gap-1 shadow-md tap-active"><i data-lucide="wand-2" class="w-3.5 h-3.5"></i> 분석 실행</button>
                             </div>
                             <div id="ai-response-box" class="text-xs leading-relaxed space-y-3 min-h-[160px] text-indigo-100 custom-scrollbar overflow-y-auto max-h-60 pr-1">
                                 <p class="text-slate-400 text-center py-12">우측 상단 [분석 실행] 버튼을 클릭하시면, 오늘 급식을 분석하여 오후 집중력 전략 및 저녁 메뉴를 추천합니다.</p>
@@ -209,7 +184,6 @@
         </div>
     </main>
 
-    <!-- 모바일 하단 네비게이션 -->
     <nav class="fixed bottom-0 left-0 right-0 bg-white/95 border-t border-slate-200/80 backdrop-blur-md py-2.5 px-6 flex justify-around items-center z-40 md:hidden shadow-lg">
         <button onclick="switchTab('weekly')" class="flex flex-col items-center gap-1 text-slate-500 active:text-blue-600 transition tap-active"><i data-lucide="calendar" class="w-5 h-5"></i><span class="text-[9px] font-bold">주간급식</span></button>
         <button onclick="switchTab('daily')" class="flex flex-col items-center gap-1 text-slate-500 active:text-blue-600 transition tap-active"><i data-lucide="sparkles" class="w-5 h-5"></i><span class="text-[9px] font-bold">AI분석</span></button>
@@ -218,16 +192,15 @@
 
     <script>
         const apiKey = ""; // Gemini API Key
-
         const ALLERGY_INFO = { 1: "난류", 2: "우유", 3: "메밀", 4: "땅콩", 5: "대두", 6: "밀", 7: "고등어", 8: "게", 9: "새우", 10: "돼지고기", 11: "복숭아", 12: "토마토", 13: "아황산류", 14: "호두", 15: "닭고기", 16: "쇠고기", 17: "오징어", 18: "조개류", 19: "잣" };
         const PRESETS = { dairy: [2], seafood: [7, 8, 9, 17, 18], meat: [10, 15, 16], eggs: [1] };
 
         let activeAllergies = new Set([1, 2, 5, 6]);
         let scrapedMeals = {}; 
         let currentSelectedDate = null;
-        let currentTargetDate = new Date(); // 항상 실제 오늘 날짜 기준으로 초기화 (가상 2026일 경우 new Date('2026-05-18') 사용 가능)
+        let currentTargetDate = new Date(); 
         
-        // 챗봇 시뮬레이션 환경용 오늘 고정 (실제 배포시 아래 주석을 지우고 new Date() 적용 권장)
+        // 시뮬레이션을 위해 주석 처리 (실제 서버 운영시는 아래 한줄을 삭제하세요)
         currentTargetDate = new Date('2026-05-18'); 
 
         let touchStartX = 0, touchEndX = 0, deferredPrompt;
@@ -268,7 +241,7 @@
             else indicator.innerHTML = `<span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-100 text-rose-800">수신 에러</span>`;
         }
 
-        // --- 알림 (푸시 & 서비스워커) ---
+        // --- 백그라운드 푸시 & 알림 연동 ---
         function registerPwaAndNotificationCheck() {
             if ('serviceWorker' in navigator) {
                 navigator.serviceWorker.register('./sw.js')
@@ -302,47 +275,18 @@
             }
         }
 
-        // [중요 수정] 실제 당일(오늘) 날짜의 식단 정보를 추출하여 알림으로 전송
-        function sendTestNotificationDirectly() {
+        // 백그라운드 서비스워커에게 권한을 위임하여 스스로 식단을 찾게 하는 트리거
+        function triggerBackgroundTest() {
             if (Notification.permission !== 'granted') return showToast("먼저 [1단계: 알림 권한 허용하기] 버튼을 눌러주세요!");
             
-            // 1. 당일 날짜 계산 (테스트 환경 기준)
-            const realToday = new Date('2026-05-18'); // 실 배포 시 new Date() 로 변경 권장
-            const todayStr = `${realToday.getFullYear()}-${String(realToday.getMonth()+1).padStart(2,'0')}-${String(realToday.getDate()).padStart(2,'0')}`;
-            
-            // 2. 당일 급식 데이터 검색
-            const mealData = scrapedMeals[todayStr];
-            
-            let notiTitle = `🔔 성일고 당일 급식 알람`;
-            let notiBody = `오늘(${todayStr.substring(5)})은 수집된 데이터가 없습니다.`;
-
-            // 3. 당일 데이터가 있으면 당일 메뉴, 만약 로딩 안됐다면 화면에 떠있는 메뉴로 Fallback
-            if (mealData) {
-                const cleanMenu = mealData.rawMenu.replace(/\d+\./g, '').replace(/\./g, '').trim();
-                notiTitle = `🔔 성일고 ${todayStr.substring(5)} 오늘의 급식`;
-                notiBody = `메뉴: ${cleanMenu} (${mealData.calories}kcal)\n터치하여 AI 분석 확인!`;
-            } else if (currentSelectedDate && scrapedMeals[currentSelectedDate]) {
-                const fallbackData = scrapedMeals[currentSelectedDate];
-                const cleanMenu = fallbackData.rawMenu.replace(/\d+\./g, '').replace(/\./g, '').trim();
-                notiTitle = `🔔 성일고 ${currentSelectedDate.substring(5)} 급식 (미리보기)`;
-                notiBody = `메뉴: ${cleanMenu} (${fallbackData.calories}kcal)`;
-            }
-
-            showToast("3초 뒤 당일 식단 알림이 발송됩니다. 홈 화면으로 나가보세요!");
-            addLog("3초 뒤 당일 식단 푸시 발송 예약 완료", "info");
+            showToast("3초 뒤 서비스 워커가 백그라운드에서 직접 식단을 추출하여 알림을 띄웁니다! 앱을 꺼보세요.");
+            addLog("3초 뒤 백그라운드 추출 프로세스 호출", "info");
             
             setTimeout(() => {
                 navigator.serviceWorker.ready.then(reg => {
-                    reg.showNotification(notiTitle, {
-                        body: notiBody,
-                        icon: 'https://cdn-icons-png.flaticon.com/512/3408/3408506.png',
-                        badge: 'https://cdn-icons-png.flaticon.com/512/3408/3408506.png',
-                        vibrate: [200, 100, 200, 100, 200], // 징-징-징-
-                        requireInteraction: true,
-                        data: { url: '/' }
-                    });
-                    addLog("실제 식단 알림 송출 완료", "success");
-                }).catch(err => addLog(`알림 에러: ${err}`, "error"));
+                    // 이제 인덱스HTML에서 정보를 주지 않고, SW에게 '일해라!'라고 신호만 보냅니다.
+                    reg.active.postMessage({ type: 'SEND_TEST_ALARM' });
+                }).catch(err => addLog(`알림 엔진 통신 에러: ${err}`, "error"));
             }, 3000);
         }
 
@@ -372,12 +316,8 @@
 
             try {
                 addLog("NEIS 공공데이터 포털 호출 중...", "info");
-                const schoolRes = await fetch('https://open.neis.go.kr/hub/schoolInfo?Type=json&SCHUL_NM=성일고등학교');
-                const schoolData = await schoolRes.json();
-                const school = schoolData.schoolInfo[1].row.find(s => s.ATPT_OFCDC_SC_NM.includes('경기'));
-                
-                const mealRes = await fetch(`https://open.neis.go.kr/hub/mealServiceDietInfo?Type=json&ATPT_OFCDC_SC_CODE=${school.ATPT_OFCDC_SC_CODE}&SD_SCHUL_CODE=${school.SD_SCHUL_CODE}&MLSV_FROM_YMD=${range.fromStr}&MLSV_TO_YMD=${range.toStr}`);
-                const mealData = await mealRes.json();
+                const res = await fetch(`https://open.neis.go.kr/hub/mealServiceDietInfo?Type=json&ATPT_OFCDC_SC_CODE=J10&SD_SCHUL_CODE=7530167&MLSV_FROM_YMD=${range.fromStr}&MLSV_TO_YMD=${range.toStr}`);
+                const mealData = await res.json();
                 
                 if (!mealData.mealServiceDietInfo) {
                     addLog("데이터 미등록. 자체 시뮬레이션 데이터를 불러옵니다.", "warn");
@@ -442,7 +382,9 @@
             const c = document.getElementById('weekly-cards-grid'); c.innerHTML = '';
             const wd = ["월", "화", "수", "목", "금"];
             const dates = Object.keys(scrapedMeals).sort();
-            const today = `${new Date('2026-05-18').getFullYear()}-${String(new Date('2026-05-18').getMonth()+1).padStart(2,'0')}-${String(new Date('2026-05-18').getDate()).padStart(2,'0')}`;
+            
+            const todayObj = new Date();
+            const today = `${todayObj.getFullYear()}-${String(todayObj.getMonth()+1).padStart(2,'0')}-${String(todayObj.getDate()).padStart(2,'0')}`;
 
             dates.forEach((k, i) => {
                 const m = scrapedMeals[k];
@@ -500,7 +442,7 @@
 
         // --- 기타 기능 (스와이프, AI) ---
         function navigateWeek(d) { currentTargetDate.setDate(currentTargetDate.getDate() + d); fetchNeisTodayData(); }
-        function resetToToday() { currentTargetDate = new Date('2026-05-18'); fetchNeisTodayData(); }
+        function resetToToday() { currentTargetDate = new Date(); fetchNeisTodayData(); }
         function setupSwipeGestures() {
             const z = document.getElementById('touch-swipe-zone');
             z.addEventListener('touchstart', e => touchStartX = e.changedTouches[0].screenX, {passive:true});
@@ -550,4 +492,4 @@
 </html>
 
 
-```
+
