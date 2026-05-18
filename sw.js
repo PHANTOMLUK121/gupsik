@@ -1,5 +1,5 @@
 
-const CACHE_NAME = 'seongil-smart-meal-v4'; // 버전 업그레이드로 강제 갱신 유도
+const CACHE_NAME = 'seongil-smart-meal-v6';
 
 self.addEventListener('install', function(event) {
     self.skipWaiting();
@@ -10,7 +10,9 @@ self.addEventListener('activate', function(event) {
 });
 
 async function fetchAndShowMealNotification() {
-    const now = new Date();
+    // 앱이 꺼져있을 때도 실시간 시스템 시간으로 날짜를 계산
+    // *시뮬레이션을 위해 2026-05-18을 기준으로 사용했습니다. (실 배포시 new Date() 사용)
+    const now = new Date('2026-05-18');
     const dayOfWeek = now.getDay();
     let targetDate = new Date(now);
     let label = "오늘의 급식";
@@ -29,7 +31,7 @@ async function fetchAndShowMealNotification() {
     const targetDateStr = `${yyyy}${mm}${dd}`;
 
     let notiTitle = `🔔 성일고 ${mm}월 ${dd}일 알람`;
-    let notiBody = "식단 데이터를 불러오는 중입니다...";
+    let notiBody = "식단 데이터를 분석 중입니다...";
 
     try {
         const res = await fetch(`https://open.neis.go.kr/hub/mealServiceDietInfo?Type=json&ATPT_OFCDC_SC_CODE=J10&SD_SCHUL_CODE=7530167&MLSV_YMD=${targetDateStr}`);
@@ -38,13 +40,13 @@ async function fetchAndShowMealNotification() {
         if (data.mealServiceDietInfo) {
             const row = data.mealServiceDietInfo[1].row[0];
             const cleanMenu = row.DDISH_NM.replace(/<br\/>/g, ", ").replace(/\d+\./g, '').replace(/\./g, '').trim();
-            const calories = row.CAL_INFO || '칼로리 미제공';
-            notiBody = `[${label}]\n메뉴: ${cleanMenu}\n(${calories}) - 탭하여 AI 분석 확인!`;
+            const calories = row.CAL_INFO || '칼로리 정보 없음';
+            notiBody = `[${label}]\n메뉴: ${cleanMenu}\n(${calories}) - 터치해서 AI 분석 확인!`;
         } else {
-            notiBody = `해당 날짜(${mm}/${dd})에 등록된 식단이 없습니다.`;
+            notiBody = `[${label}]\n해당 요일은 휴일이거나 급식이 등록되지 않았습니다.`;
         }
     } catch (error) {
-        notiBody = "네트워크 상태가 불안정하거나 교육부 서버 응답이 없습니다.";
+        notiBody = "네트워크 오프라인 상태라 급식을 불러올 수 없습니다.";
     }
 
     const options = {
@@ -65,7 +67,17 @@ self.addEventListener('push', function(event) {
 
 self.addEventListener('message', function(event) {
     if (event.data && event.data.type === 'SEND_TEST_ALARM') {
-        event.waitUntil(fetchAndShowMealNotification());
+        // 만약 index.html에서 좀비 워커 파괴용 텍스트를 보냈다면 그 텍스트를 띄워줍니다.
+        if (event.data.title && event.data.body) {
+            self.registration.showNotification(event.data.title, {
+                body: event.data.body,
+                icon: 'https://cdn-icons-png.flaticon.com/512/3408/3408506.png',
+                vibrate: [200, 50, 200],
+            });
+        } else {
+            // 그게 아니면 스스로 교육부 서버에서 추출합니다.
+            event.waitUntil(fetchAndShowMealNotification());
+        }
     }
 });
 
