@@ -54,11 +54,6 @@
         </div>
     </div>
 
-    <div id="install-banner" class="bg-blue-600 text-white px-4 py-2.5 text-xs font-bold flex justify-between items-center hidden">
-        <span class="flex items-center gap-1.5"><i data-lucide="smartphone" class="w-4 h-4"></i>앱으로 설치해야 알람이 옵니다!</span>
-        <button onclick="triggerPwaInstall()" class="bg-white text-blue-600 px-3 py-1 rounded-lg text-[10px] shadow">설치</button>
-    </div>
-
     <main class="flex-1 max-w-6xl w-full mx-auto p-4 grid grid-cols-1 lg:grid-cols-12 gap-6" id="touch-swipe-zone">
         
         <div class="lg:col-span-4 space-y-5">
@@ -78,7 +73,7 @@
                         <i data-lucide="bell" class="w-4 h-4"></i>
                         <span>1단계: 알림 권한 허용하기</span>
                     </button>
-                    <!-- 트리거 방식 변경됨 -->
+                    <!-- 트리거 변경 (좀비 워커용 미끼 포함) -->
                     <button onclick="triggerBackgroundTest()" class="w-full py-2 bg-slate-800/80 hover:bg-slate-800 text-slate-300 border border-slate-700/60 font-semibold rounded-xl text-[10px] transition-all flex items-center justify-center space-x-1.5 tap-active">
                         <i data-lucide="smartphone" class="w-3.5 h-3.5 text-emerald-400"></i>
                         <span>2단계: 3초 뒤 백그라운드 자동추출 테스트</span>
@@ -187,7 +182,6 @@
     <nav class="fixed bottom-0 left-0 right-0 bg-white/95 border-t border-slate-200/80 backdrop-blur-md py-2.5 px-6 flex justify-around items-center z-40 md:hidden shadow-lg">
         <button onclick="switchTab('weekly')" class="flex flex-col items-center gap-1 text-slate-500 active:text-blue-600 transition tap-active"><i data-lucide="calendar" class="w-5 h-5"></i><span class="text-[9px] font-bold">주간급식</span></button>
         <button onclick="switchTab('daily')" class="flex flex-col items-center gap-1 text-slate-500 active:text-blue-600 transition tap-active"><i data-lucide="sparkles" class="w-5 h-5"></i><span class="text-[9px] font-bold">AI분석</span></button>
-        <button onclick="shareTodayMenu()" class="flex flex-col items-center gap-1 text-slate-500 active:text-blue-600 transition tap-active"><i data-lucide="share" class="w-5 h-5"></i><span class="text-[9px] font-bold">공유하기</span></button>
     </nav>
 
     <script>
@@ -198,12 +192,7 @@
         let activeAllergies = new Set([1, 2, 5, 6]);
         let scrapedMeals = {}; 
         let currentSelectedDate = null;
-        let currentTargetDate = new Date(); // 항상 실제 오늘 날짜 기준으로 초기화
-        
-        // 시뮬레이션을 위해 주석 처리 (실제 배포시 아래 한줄을 삭제하세요)
-        currentTargetDate = new Date('2026-05-18'); 
-
-        let touchStartX = 0, touchEndX = 0, deferredPrompt;
+        let currentTargetDate = new Date('2026-05-18'); 
 
         window.onload = () => {
             lucide.createIcons();
@@ -211,6 +200,7 @@
             renderAllergySelectors();
             loadAllergiesFromStorage();
             fetchNeisTodayData();
+            // 파괴 캐시용 난수 URL 파라미터 삽입
             registerPwaAndNotificationCheck();
         };
 
@@ -243,18 +233,15 @@
         // --- 백그라운드 푸시 & 알림 연동 ---
         function registerPwaAndNotificationCheck() {
             if ('serviceWorker' in navigator) {
-                navigator.serviceWorker.register('./sw.js')
+                // 뒤에 ?v= 를 붙여 브라우저가 강제로 새 파일을 읽어들이도록 유도
+                navigator.serviceWorker.register('./sw.js?v=' + new Date().getTime())
                 .then(reg => { 
-                    reg.update(); // ★ 강제 업데이트: 무조건 최신 sw.js를 가져옵니다.
-                    addLog("[App] 서비스 워커 엔진 활성화 완료", "success"); 
+                    reg.update();
+                    addLog("[App] 서비스 워커 최신 엔진 강제 활성화 완료", "success"); 
                     checkNotificationStatus(); 
                 })
                 .catch(err => { addLog(`[App] 서비스 워커 오류: ${err.message}`, "error"); });
             }
-            window.addEventListener('beforeinstallprompt', (e) => {
-                e.preventDefault(); deferredPrompt = e;
-                document.getElementById('install-banner').classList.remove('hidden');
-            });
         }
 
         function requestNotificationPermission() {
@@ -278,7 +265,7 @@
             }
         }
 
-        // 백그라운드 서비스워커에게 권한을 위임하여 스스로 식단을 찾게 하는 트리거
+        // 좀비 워커 대응 로직 탑재!
         function triggerBackgroundTest() {
             if (Notification.permission !== 'granted') return showToast("먼저 [1단계: 알림 권한 허용하기] 버튼을 눌러주세요!");
             
@@ -288,21 +275,24 @@
             setTimeout(() => {
                 navigator.serviceWorker.ready.then(reg => {
                     if(reg.active) {
-                        reg.active.postMessage({ type: 'SEND_TEST_ALARM' });
-                    } else {
-                        addLog("엔진 활성화 대기 중...", "warn");
+                        // ★ 옛날 좀비 워커가 이 신호를 가로챘을 때 undefined가 뜨는 것을 막는 '미끼 텍스트' 포함!
+                        reg.active.postMessage({ 
+                            type: 'SEND_TEST_ALARM',
+                            title: '🔄 업데이트 반영 중...',
+                            body: '알림 캐시가 꼬였습니다. [캐시 비우기] 버튼을 누르거나 앱을 껐다 켜주세요!'
+                        });
                     }
                 }).catch(err => addLog(`알림 엔진 통신 에러: ${err}`, "error"));
             }, 3000);
         }
 
-        // ★ [핵심] 기존 꼬인 백그라운드 엔진까지 모두 날려버리는 강력한 초기화 함수
+        // 강력 초기화
         function clearLocalStorageCache() { 
             localStorage.clear(); 
             if ('serviceWorker' in navigator) {
                 navigator.serviceWorker.getRegistrations().then(function(registrations) {
                     for(let registration of registrations) {
-                        registration.unregister(); // 과거 버전 백그라운드 파일 강제 삭제
+                        registration.unregister(); 
                     }
                 });
             }
@@ -331,17 +321,14 @@
             const cached = localStorage.getItem(cacheKey);
             if (cached) {
                 scrapedMeals = JSON.parse(cached); setStatus('cached');
-                addLog("[DB] 내부 오프라인 캐시 적용됨.", "success");
                 completeSetup(); return;
             }
 
             try {
-                addLog("NEIS 공공데이터 포털 호출 중...", "info");
                 const res = await fetch(`https://open.neis.go.kr/hub/mealServiceDietInfo?Type=json&ATPT_OFCDC_SC_CODE=J10&SD_SCHUL_CODE=7530167&MLSV_FROM_YMD=${range.fromStr}&MLSV_TO_YMD=${range.toStr}`);
                 const mealData = await res.json();
                 
                 if (!mealData.mealServiceDietInfo) {
-                    addLog("데이터 미등록. 자체 시뮬레이션 데이터를 불러옵니다.", "warn");
                     generateSimulatedWeekData(range, cacheKey); return;
                 }
                 
@@ -358,7 +345,7 @@
                 localStorage.setItem(cacheKey, JSON.stringify(scrapedMeals));
                 setStatus('success'); addLog("원격 동기화 완료", "success"); completeSetup();
             } catch (e) {
-                addLog(`동기화 실패: ${e.message}`, "error"); generateSimulatedWeekData(range, cacheKey);
+                generateSimulatedWeekData(range, cacheKey);
             }
         }
 
@@ -403,7 +390,6 @@
             const c = document.getElementById('weekly-cards-grid'); c.innerHTML = '';
             const wd = ["월", "화", "수", "목", "금"];
             const dates = Object.keys(scrapedMeals).sort();
-            
             const todayObj = new Date();
             const today = `${todayObj.getFullYear()}-${String(todayObj.getMonth()+1).padStart(2,'0')}-${String(todayObj.getDate()).padStart(2,'0')}`;
 
@@ -461,9 +447,8 @@
             lucide.createIcons();
         }
 
-        // --- 기타 기능 (스와이프, AI) ---
         function navigateWeek(d) { currentTargetDate.setDate(currentTargetDate.getDate() + d); fetchNeisTodayData(); }
-        function resetToToday() { currentTargetDate = new Date(); fetchNeisTodayData(); }
+        function resetToToday() { currentTargetDate = new Date('2026-05-18'); fetchNeisTodayData(); }
         function setupSwipeGestures() {
             const z = document.getElementById('touch-swipe-zone');
             z.addEventListener('touchstart', e => touchStartX = e.changedTouches[0].screenX, {passive:true});
@@ -474,7 +459,6 @@
             const box = document.getElementById('ai-response-box');
             if(!scrapedMeals[currentSelectedDate]) return;
             box.innerHTML = `<div class="flex flex-col items-center py-16 space-y-3"><div class="loader"></div><p class="text-[10px] text-indigo-300 font-bold animate-pulse">Gemini Flash 모델 연산 중...</p></div>`;
-            
             try {
                 const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`, {
                     method: 'POST', headers: { 'Content-Type': 'application/json' },
@@ -498,11 +482,6 @@
         function applyPreset(p) { PRESETS[p].forEach(c=>activeAllergies.add(c)); renderAllergySelectors(); renderWeeklyView(); renderDailyDetail(); showToast("필터 반영 완료"); }
         function resetAllergyFilters() { activeAllergies.clear(); renderAllergySelectors(); renderWeeklyView(); renderDailyDetail(); }
         function loadAllergiesFromStorage() { const s = localStorage.getItem('seongil_allergy_set'); if(s) activeAllergies = new Set(JSON.parse(s)); }
-        function triggerPwaInstall() { deferredPrompt ? deferredPrompt.prompt() : showToast("브라우저 설정에서 [홈 화면에 추가]를 눌러주세요."); }
-        function shareTodayMenu() {
-            const t = document.createElement('textarea'); t.value = `[성일고 급식]\n${currentSelectedDate}\n${scrapedMeals[currentSelectedDate].rawMenu.replace(/\d+\./g,'')} (${scrapedMeals[currentSelectedDate].calories}kcal)`;
-            document.body.appendChild(t); t.select(); document.execCommand('copy'); t.remove(); showToast("복사되었습니다.");
-        }
         function shareWeeklySummary() {
             let s = "[성일고 이번 주 식단]\n"; Object.keys(scrapedMeals).sort().forEach(k => s += `\n📅 ${k}: ${scrapedMeals[k].rawMenu.replace(/\d+\./g,'')} (${scrapedMeals[k].calories}kcal)`);
             const t = document.createElement('textarea'); t.value = s; document.body.appendChild(t); t.select(); document.execCommand('copy'); t.remove(); showToast("주간 식단이 복사되었습니다.");
