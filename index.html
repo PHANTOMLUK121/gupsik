@@ -73,10 +73,10 @@
                         <i data-lucide="bell" class="w-4 h-4"></i>
                         <span>1단계: 알림 권한 허용하기</span>
                     </button>
-                    <!-- 트리거 변경 (좀비 워커용 미끼 포함) -->
+                    <!-- 미끼 텍스트를 빼고 순수하게 신호만 보내는 버튼으로 수정 -->
                     <button onclick="triggerBackgroundTest()" class="w-full py-2 bg-slate-800/80 hover:bg-slate-800 text-slate-300 border border-slate-700/60 font-semibold rounded-xl text-[10px] transition-all flex items-center justify-center space-x-1.5 tap-active">
                         <i data-lucide="smartphone" class="w-3.5 h-3.5 text-emerald-400"></i>
-                        <span>2단계: 3초 뒤 백그라운드 자동추출 테스트</span>
+                        <span>2단계: 3초 뒤 백그라운드 당일식단 추출 테스트</span>
                     </button>
                 </div>
             </div>
@@ -185,22 +185,21 @@
     </nav>
 
     <script>
-        const apiKey = ""; // Gemini API Key
+        const apiKey = ""; 
         const ALLERGY_INFO = { 1: "난류", 2: "우유", 3: "메밀", 4: "땅콩", 5: "대두", 6: "밀", 7: "고등어", 8: "게", 9: "새우", 10: "돼지고기", 11: "복숭아", 12: "토마토", 13: "아황산류", 14: "호두", 15: "닭고기", 16: "쇠고기", 17: "오징어", 18: "조개류", 19: "잣" };
         const PRESETS = { dairy: [2], seafood: [7, 8, 9, 17, 18], meat: [10, 15, 16], eggs: [1] };
 
         let activeAllergies = new Set([1, 2, 5, 6]);
         let scrapedMeals = {}; 
         let currentSelectedDate = null;
-        let currentTargetDate = new Date('2026-05-18'); 
-
+        let currentTargetDate = new Date(); // 테스트 후 실제 운영 시 이것만 유지하세요.
+        
         window.onload = () => {
             lucide.createIcons();
             setupSwipeGestures();
             renderAllergySelectors();
             loadAllergiesFromStorage();
             fetchNeisTodayData();
-            // 파괴 캐시용 난수 URL 파라미터 삽입
             registerPwaAndNotificationCheck();
         };
 
@@ -230,14 +229,14 @@
             else indicator.innerHTML = `<span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-100 text-rose-800">수신 에러</span>`;
         }
 
-        // --- 백그라운드 푸시 & 알림 연동 ---
+        // --- 백그라운드 푸시 연동 ---
         function registerPwaAndNotificationCheck() {
             if ('serviceWorker' in navigator) {
-                // 뒤에 ?v= 를 붙여 브라우저가 강제로 새 파일을 읽어들이도록 유도
+                // v= 파라미터로 브라우저가 새 버전을 인식하도록 돕습니다.
                 navigator.serviceWorker.register('./sw.js?v=' + new Date().getTime())
                 .then(reg => { 
                     reg.update();
-                    addLog("[App] 서비스 워커 최신 엔진 강제 활성화 완료", "success"); 
+                    addLog("[App] 서비스 워커 최신 엔진 강제 업데이트", "success"); 
                     checkNotificationStatus(); 
                 })
                 .catch(err => { addLog(`[App] 서비스 워커 오류: ${err.message}`, "error"); });
@@ -265,28 +264,24 @@
             }
         }
 
-        // 좀비 워커 대응 로직 탑재!
+        // ★ [핵심] 미끼 코드를 버리고 순수 신호만 전송합니다!
         function triggerBackgroundTest() {
             if (Notification.permission !== 'granted') return showToast("먼저 [1단계: 알림 권한 허용하기] 버튼을 눌러주세요!");
             
-            showToast("3초 뒤 서비스 워커가 백그라운드에서 직접 식단을 추출하여 알림을 띄웁니다! 앱을 꺼보세요.");
+            showToast("3초 뒤 서비스 워커가 백그라운드에서 당일 식단을 추출합니다! 홈 화면으로 나가보세요.");
             addLog("3초 뒤 백그라운드 추출 프로세스 호출", "info");
             
             setTimeout(() => {
                 navigator.serviceWorker.ready.then(reg => {
                     if(reg.active) {
-                        // ★ 옛날 좀비 워커가 이 신호를 가로챘을 때 undefined가 뜨는 것을 막는 '미끼 텍스트' 포함!
-                        reg.active.postMessage({ 
-                            type: 'SEND_TEST_ALARM',
-                            title: '🔄 업데이트 반영 중...',
-                            body: '알림 캐시가 꼬였습니다. [캐시 비우기] 버튼을 누르거나 앱을 껐다 켜주세요!'
-                        });
+                        // 제목/내용 없이 오로지 신호(Type)만 전송합니다!
+                        reg.active.postMessage({ type: 'SEND_TEST_ALARM' });
                     }
                 }).catch(err => addLog(`알림 엔진 통신 에러: ${err}`, "error"));
             }, 3000);
         }
 
-        // 강력 초기화
+        // 초기화
         function clearLocalStorageCache() { 
             localStorage.clear(); 
             if ('serviceWorker' in navigator) {
@@ -296,7 +291,7 @@
                     }
                 });
             }
-            addLog("[App] 메모리 및 낡은 백그라운드 엔진 삭제 완료", "error");
+            addLog("[App] 캐시 및 낡은 백그라운드 엔진 삭제 완료", "error");
             showToast("완전 초기화되었습니다. 새로고침합니다.");
             setTimeout(() => { location.reload(true); }, 1500); 
         }
@@ -447,8 +442,9 @@
             lucide.createIcons();
         }
 
+        // --- 기타 기능 (스와이프, AI) ---
         function navigateWeek(d) { currentTargetDate.setDate(currentTargetDate.getDate() + d); fetchNeisTodayData(); }
-        function resetToToday() { currentTargetDate = new Date('2026-05-18'); fetchNeisTodayData(); }
+        function resetToToday() { currentTargetDate = new Date(); fetchNeisTodayData(); }
         function setupSwipeGestures() {
             const z = document.getElementById('touch-swipe-zone');
             z.addEventListener('touchstart', e => touchStartX = e.changedTouches[0].screenX, {passive:true});
@@ -482,10 +478,6 @@
         function applyPreset(p) { PRESETS[p].forEach(c=>activeAllergies.add(c)); renderAllergySelectors(); renderWeeklyView(); renderDailyDetail(); showToast("필터 반영 완료"); }
         function resetAllergyFilters() { activeAllergies.clear(); renderAllergySelectors(); renderWeeklyView(); renderDailyDetail(); }
         function loadAllergiesFromStorage() { const s = localStorage.getItem('seongil_allergy_set'); if(s) activeAllergies = new Set(JSON.parse(s)); }
-        function shareWeeklySummary() {
-            let s = "[성일고 이번 주 식단]\n"; Object.keys(scrapedMeals).sort().forEach(k => s += `\n📅 ${k}: ${scrapedMeals[k].rawMenu.replace(/\d+\./g,'')} (${scrapedMeals[k].calories}kcal)`);
-            const t = document.createElement('textarea'); t.value = s; document.body.appendChild(t); t.select(); document.execCommand('copy'); t.remove(); showToast("주간 식단이 복사되었습니다.");
-        }
     </script>
 </body>
 </html>
