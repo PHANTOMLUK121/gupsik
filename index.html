@@ -14,13 +14,11 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     
-    <!-- Firebase 11.6.1 SDK 임포트 (규정 준수) -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // 전역 제공 변수 안전 로드
         const firebaseConfig = JSON.parse(__firebase_config);
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
@@ -31,7 +29,6 @@
         window.firebaseAuth = auth;
         window.firebaseAppId = appId;
 
-        // Firebase 익명 로그인 (동작 필수 규칙 3 준수)
         signInAnonymously(auth).then(() => {
             console.log("[Firebase] 익명 보안 인증 성공");
             onAuthStateChanged(auth, (user) => {
@@ -116,7 +113,6 @@
                 </div>
             </div>
 
-            <!-- 네비게이션 & 필터 -->
             <div class="bg-white p-5 rounded-3xl border border-slate-200/80 shadow-sm space-y-4">
                 <div class="flex items-center justify-between">
                     <span class="text-[11px] font-extrabold text-blue-600 uppercase tracking-wider block">조회 기간 설정</span>
@@ -164,7 +160,6 @@
             </div>
         </div>
 
-        <!-- 우측 뷰 영역 -->
         <div class="lg:col-span-8 space-y-5">
             <div class="bg-white p-1.5 rounded-2xl border border-slate-200 flex space-x-1 shadow-sm">
                 <button onclick="switchTab('weekly')" id="tab-weekly" class="flex-1 py-2.5 text-xs md:text-sm font-extrabold rounded-xl bg-blue-600 text-white shadow-sm flex items-center justify-center space-x-1.5 transition-all tap-active"><i data-lucide="layout-grid" class="w-4 h-4"></i><span>주간 식단표</span></button>
@@ -205,7 +200,7 @@
                                 <button onclick="triggerAiCoaching()" class="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white text-[10px] font-bold rounded-xl transition flex items-center gap-1 shadow-md tap-active"><i data-lucide="wand-2" class="w-3.5 h-3.5"></i> 분석 실행</button>
                             </div>
                             <div id="ai-response-box" class="text-xs leading-relaxed space-y-3 min-h-[160px] text-indigo-100 custom-scrollbar overflow-y-auto max-h-60 pr-1">
-                                <p class="text-slate-400 text-center py-12">우측 상단 [분석 실행] 버튼을 클릭하시면, 오늘 급식을 분석하여 오후 집중력 전략 및 저녁 메뉴를 추천합니다.</p>
+                                <p class="text-slate-400 text-center py-12">우측 상단 [분석 실행] 버튼을 클릭하시면 분석 리포트가 생성됩니다.</p>
                             </div>
                         </div>
                     </div>
@@ -229,7 +224,7 @@
         let currentSelectedDate = null;
         let currentTargetDate = new Date('2026-05-18'); 
 
-        let touchStartX = 0, touchEndX = 0, deferredPrompt;
+        let touchStartX = 0, touchEndX = 0;
 
         window.onload = () => {
             lucide.createIcons();
@@ -271,14 +266,13 @@
                 navigator.serviceWorker.register('./sw.js?v=' + new Date().getTime())
                 .then(reg => { 
                     reg.update();
-                    addLog("[App] 서비스 워커 최신 엔진 강제 업데이트", "success"); 
+                    addLog("[App] 서비스 워커 가동 완료", "success"); 
                     checkNotificationStatus(); 
                 })
-                .catch(err => { addLog(`[App] 서비스 워커 오류: ${err.message}`, "error"); });
+                .catch(err => { addLog(`[App] 워커 오류: ${err.message}`, "error"); });
             }
         }
 
-        // 1단계: 웹 푸시 알림 권한 팝업을 띄우고 스마트폰 고유 주소(Token) 획득
         function requestNotificationPermission() {
             if (!('Notification' in window)) return showToast("브라우저가 알림을 지원하지 않습니다.");
             
@@ -289,49 +283,34 @@
                     addLog("[App] 푸시 권한 획득 성공", "success");
                     
                     navigator.serviceWorker.ready.then(reg => {
-                        // 깃허브 액션과 일치시킬 무료 공개키 자동 맵핑 (VAPID)
                         const publicKey = "BFdAwG7cLdfsCGY9Hu6GSxp1h0Dh8An27quF7UhbCI41txg5y5zynaSsdbIYi7Cjff13ny72J4B74lELy4FrCtc";
                         reg.pushManager.subscribe({
                             userVisibleOnly: true,
                             applicationServerKey: urlBase64ToUint8Array(publicKey)
                         })
                         .then(subscription => {
-                            addLog("[App] 고유 주소 토큰 발급 성공. 클라우드에 영구 백업합니다.", "success");
+                            addLog("[App] 고유 구독 토큰 발급 성공", "success");
                             saveSubscriptionToDatabase(subscription);
                         })
-                        .catch(err => {
-                            addLog(`구독 주소 발급 지연: ${err.message}`, "warn");
-                        });
+                        .catch(err => { addLog(`구독 발급 지연: ${err.message}`, "warn"); });
                     });
                 } else {
-                    showToast("알림이 거부되었습니다. 스마트폰 권한 설정에서 풀어주셔야 합니다.");
+                    showToast("알림이 거부되었습니다.");
                 }
             });
         }
 
-        // 2단계: 파이어베이스 공식 규정에 의해 기기 주소록을 클라우드 Firestore에 즉시 보관
         function saveSubscriptionToDatabase(subscription) {
-            // Firestore 규칙 1 준수: /artifacts/{appId}/public/data/subscriptions 경로에 저장
-            if (!window.firebaseDb) {
-                addLog("[DB] 파이어베이스 로딩 지연. 잠시 후 자동 재시도합니다.", "warn");
+            if (!window.firebaseDb || !window.firebaseUser) {
+                addLog("[DB] 파이어베이스 세션 인증 대기중...", "warn");
                 return;
             }
 
             const db = window.firebaseDb;
             const appId = window.firebaseAppId;
-            
-            // 토큰 고유해시 추출하여 중복 방지
             const rawToken = JSON.stringify(subscription);
             const docId = btoa(rawToken).substring(0, 50).replace(/[/+=]/g, '_');
-
-            // doc(db, 'artifacts', appId, 'public', 'data', collectionName, documentId) 공식 준수
             const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'push_subscriptions', docId);
-
-            // 규칙 3: 인증 상태 보장 점검 후 주입
-            if (!window.firebaseUser) {
-                addLog("[DB] 보안 채널 연동 지연중...", "warn");
-                return;
-            }
 
             setDoc(docRef, {
                 subscription: JSON.parse(rawToken),
@@ -339,11 +318,8 @@
             })
             .then(() => {
                 addLog("[DB] 스마트폰 기기 주소록 클라우드 원격 등록 완료!", "success");
-                showToast("기기 무상 등록 완료! 매일 자동 배달 준비 끝!");
             })
-            .catch(err => {
-                addLog(`[DB] 클라우드 세이빙 에러: ${err.message}`, "error");
-            });
+            .catch(err => { addLog(`[DB] 세이빙 에러: ${err.message}`, "error"); });
         }
 
         function urlBase64ToUint8Array(base64String) {
@@ -366,33 +342,24 @@
         }
 
         function triggerBackgroundTest() {
-            if (Notification.permission !== 'granted') return showToast("먼저 [1단계: 알림 권한 허용하기] 버튼을 눌러주세요!");
-            showToast("3초 뒤 서비스 워커가 백그라운드에서 당일 식단을 추출합니다! 홈 화면으로 나가보세요.");
-            addLog("3초 뒤 백그라운드 추출 프로세스 호출", "info");
+            if (Notification.permission !== 'granted') return showToast("먼저 알림 권한을 허용해 주세요!");
+            showToast("3초 뒤 서비스 워커 백그라운드 가상 테스트를 진행합니다.");
             setTimeout(() => {
                 navigator.serviceWorker.ready.then(reg => {
-                    if(reg.active) {
-                        reg.active.postMessage({ type: 'SEND_TEST_ALARM' });
-                    }
-                }).catch(err => addLog(`알림 엔진 통신 에러: ${err}`, "error"));
+                    if(reg.active) reg.active.postMessage({ type: 'SEND_TEST_ALARM' });
+                });
             }, 3000);
         }
 
         function clearLocalStorageCache() { 
             localStorage.clear(); 
             if ('serviceWorker' in navigator) {
-                navigator.serviceWorker.getRegistrations().then(function(registrations) {
-                    for(let registration of registrations) {
-                        registration.unregister(); 
-                    }
-                });
+                navigator.serviceWorker.getRegistrations().then(regs => { for(let r of regs) r.unregister(); });
             }
-            addLog("[App] 캐시 및 낡은 백그라운드 엔진 삭제 완료", "error");
             showToast("완전 초기화되었습니다. 새로고침합니다.");
             setTimeout(() => { location.reload(true); }, 1500); 
         }
 
-        // --- 급식 데이터 로직 ---
         function getWeekDateRange(targetDate) {
             const cd = targetDate.getDay();
             let dist = 1 - cd; if(cd===0) dist = -6; if(cd===6) dist = 2;
@@ -424,12 +391,21 @@
                 }
                 
                 scrapedMeals = {};
+                const weekDays = ["일", "월", "화", "수", "목", "금", "토"];
+
                 mealData.mealServiceDietInfo[1].row.forEach(r => {
-                    const dt = `${r.MLSV_YMD.substring(0,4)}-${r.MLSV_YMD.substring(4,6)}-${r.MLSV_YMD.substring(6,8)}`;
+                    const y = r.MLSV_YMD.substring(0,4), m = r.MLSV_YMD.substring(4,6), d = r.MLSV_YMD.substring(6,8);
+                    const dt = `${y}-${m}-${d}`;
+                    const dayName = weekDays[new Date(`${y}-${m}-${d}`).getDay()]; 
+
                     const cal = r.CAL_INFO ? parseInt(r.CAL_INFO.replace(/[^0-9.]/g, '')) : 0;
                     const getMac = n => { const m = (r.NTR_INFO||"").match(new RegExp(`${n}\\(g\\)\\s*:\\s*([\\d.]+)`)); return m ? Math.round(parseFloat(m[1])) : 0; };
+                    
                     scrapedMeals[dt] = {
-                        dateStr: dt, rawMenu: r.DDISH_NM.replace(/<br\/>/g, ", "), calories: cal,
+                        dateStr: `${dt}(${dayName})`,
+                        dayName: dayName,
+                        rawMenu: r.DDISH_NM.replace(/<br\/>/g, ", "), 
+                        calories: cal,
                         nutrition: { carbo: getMac('탄수화물')||Math.round(cal*.55/4), protein: getMac('단백질')||Math.round(cal*.15/4), fat: getMac('지방')||Math.round(cal*.30/9) }
                     };
                 });
@@ -444,17 +420,17 @@
             const wd = ["월", "화", "수", "목", "금"];
             const y = parseInt(range.fromStr.substring(0,4)), m = parseInt(range.fromStr.substring(4,6))-1, d = parseInt(range.fromStr.substring(6,8));
             const preset = [
-                {m: "찰수수밥, 매콤동태국5.6.13., 수제치즈불고기버거1.2.5.6.10.12., 부추겉절이, 요구르트", c: 835, n: {carbo: 112, protein: 29, fat: 24}},
-                {m: "발아현미밥, 꽃게된장찌개5.8., 불향제육볶음5.10., 에그크럼블1., 배추김치, 사과즙", c: 790, n: {carbo: 98, protein: 34, fat: 20}},
-                {m: "치킨마요덮밥1.15., 유부맑은장국5., 칠리감자구이, 석박지, 방울토마토12.", c: 865, n: {carbo: 121, protein: 25, fat: 27}},
-                {m: "기장밥, 쇠고기미역국16., 삼치유자구이, 감자볶음, 포기김치, 식혜", c: 820, n: {carbo: 104, protein: 32, fat: 21}},
-                {m: "짜장면1.10., 계란국1., 사천꿔바로우탕수육1.10., 단무지, 파인애플", c: 910, n: {carbo: 128, protein: 28, fat: 29}}
+                {m: "찰수수밥, 매콤동태국5.6.13., 수제치즈불고기버거1.2.5.6.10.12., 요구르트", c: 835, n: {carbo: 112, protein: 29, fat: 24}},
+                {m: "발아현미밥, 꽃게된장찌개5.8., 불향제육볶음5.10., 에그크럼블1., 사과즙", c: 790, n: {carbo: 98, protein: 34, fat: 20}},
+                {m: "치킨마요덮밥1.15., 유부맑은장국5., 칠리감자구이, 방울토마토12.", c: 865, n: {carbo: 121, protein: 25, fat: 27}},
+                {m: "기장밥, 쇠고기미역국16., 삼치유자구이, 감자볶음, 식혜", c: 820, n: {carbo: 104, protein: 32, fat: 21}},
+                {m: "짜장면1.10., 계란국1., 사천꿔바로우탕수육1.10., 파인애플", c: 910, n: {carbo: 128, protein: 28, fat: 29}}
             ];
             scrapedMeals = {};
             for(let i=0; i<5; i++) {
                 const dt = new Date(y, m, d+i);
                 const dtKey = `${dt.getFullYear()}-${String(dt.getMonth()+1).padStart(2,'0')}-${String(dt.getDate()).padStart(2,'0')}`;
-                scrapedMeals[dtKey] = { dateStr: `${dtKey}(${wd[i]})`, rawMenu: preset[i].m, calories: preset[i].c, nutrition: preset[i].n };
+                scrapedMeals[dtKey] = { dateStr: `${dtKey}(${wd[i]})`, dayName: wd[i], rawMenu: preset[i].m, calories: preset[i].c, nutrition: preset[i].n };
             }
             localStorage.setItem(cacheKey, JSON.stringify(scrapedMeals));
             setStatus('success'); completeSetup();
@@ -469,7 +445,6 @@
             renderWeeklyView(); renderDailySelector(); renderDailyDetail();
         }
 
-        // --- 렌더링 및 UI ---
         function switchTab(tab) {
             document.getElementById('view-weekly').classList.toggle('hidden', tab !== 'weekly');
             document.getElementById('view-daily').classList.toggle('hidden', tab === 'weekly');
@@ -479,12 +454,11 @@
 
         function renderWeeklyView() {
             const c = document.getElementById('weekly-cards-grid'); c.innerHTML = '';
-            const wd = ["월", "화", "수", "목", "금"];
             const dates = Object.keys(scrapedMeals).sort();
             const todayObj = new Date();
             const today = `${todayObj.getFullYear()}-${String(todayObj.getMonth()+1).padStart(2,'0')}-${String(todayObj.getDate()).padStart(2,'0')}`;
 
-            dates.forEach((k, i) => {
+            dates.forEach((k) => {
                 const m = scrapedMeals[k];
                 const items = m.rawMenu.split(',').map(s => {
                     const n = s.trim().replace(/[0-9.]+$/, '').replace(/[\*\(\)\[\]\{\}]/g, '').trim();
@@ -492,11 +466,15 @@
                     return { name: n, warn: codes.some(c => activeAllergies.has(c)) };
                 });
                 const isWarn = items.some(x=>x.warn), isToday = k===today;
-                
+                const dayColor = m.dayName === "월" ? 'bg-blue-50 text-blue-700' : m.dayName === "금" ? 'bg-rose-50 text-rose-700' : 'bg-slate-100 text-slate-800';
+
                 c.innerHTML += `
                     <div class="bg-white rounded-3xl border transition-all flex flex-col justify-between overflow-hidden ${isToday ? 'border-blue-500 ring-2 ring-blue-500/10 scale-[1.01]' : isWarn ? 'border-red-200 bg-red-50/10' : 'border-slate-200 shadow-sm'}">
                         <div class="p-4 border-b border-slate-100 ${isToday?'bg-blue-50/20':isWarn?'bg-red-50/20':'bg-slate-50/30'}">
-                            <div class="flex items-center justify-between"><span class="text-[10px] font-extrabold px-2.5 py-0.5 rounded-full ${wd[i%5]==="월"?'bg-blue-50 text-blue-700':wd[i%5]==="금"?'bg-rose-50 text-rose-700':'bg-slate-100 text-slate-800'}">${wd[i%5]}요일${isToday?' (오늘)':''}</span><span class="text-[9px] text-slate-400 font-mono">${k.substring(5)}</span></div>
+                            <div class="flex items-center justify-between">
+                                <span class="text-[10px] font-extrabold px-2.5 py-0.5 rounded-full ${dayColor}">${m.dayName}요일${isToday?' (오늘)':''}</span>
+                                <span class="text-[9px] text-slate-400 font-mono">${k.substring(5)}</span>
+                            </div>
                             <p class="text-xs text-slate-800 mt-2 font-black flex items-center"><i data-lucide="flame" class="w-3.5 h-3.5 text-orange-500 mr-1"></i>${m.calories} kcal</p>
                         </div>
                         <ul class="p-4 flex-1 divide-y divide-slate-100">${items.map(x=>`<li class="py-2.5 text-xs flex justify-between gap-1"><span class="${x.warn?'text-red-700 font-extrabold line-through':'text-slate-700 font-semibold'}">${x.name}</span>${x.warn?'<span class="bg-red-100 text-red-800 text-[8px] px-1.5 py-0.5 rounded font-extrabold">차단</span>':''}</li>`).join('')}</ul>
@@ -507,8 +485,9 @@
 
         function renderDailySelector() {
             const c = document.getElementById('daily-day-selector'); c.innerHTML = '';
-            Object.keys(scrapedMeals).sort().forEach((k, i) => {
-                c.innerHTML += `<button onclick="currentSelectedDate='${k}';renderDailySelector();renderDailyDetail();document.getElementById('ai-response-box').innerHTML='<p class=\\'text-slate-400 text-center py-12\\'>AI 분석을 요청하세요.</p>';" class="px-3 py-1.5 text-xs font-bold rounded-xl transition-all tap-active ${currentSelectedDate===k?'bg-white text-blue-600 shadow-sm':'text-slate-500 hover:text-slate-800'}">${["월","화","수","목","금"][i%5]}</button>`;
+            Object.keys(scrapedMeals).sort().forEach((k) => {
+                const m = scrapedMeals[k];
+                c.innerHTML += `<button onclick="currentSelectedDate='${k}';renderDailySelector();renderDailyDetail();" class="px-3 py-1.5 text-xs font-bold rounded-xl transition-all tap-active ${currentSelectedDate===k?'bg-white text-blue-600 shadow-sm':'text-slate-500 hover:text-slate-800'}">${m.dayName}</button>`;
             });
         }
 
@@ -527,7 +506,7 @@
 
             document.getElementById('daily-detail-card').innerHTML = `
                 <div class="space-y-4">
-                    <div class="flex items-center justify-between"><span class="text-sm font-extrabold text-slate-900">${currentSelectedDate}</span><span class="text-xs font-extrabold text-blue-600 bg-blue-50 px-3 py-1 rounded-xl border border-blue-100">${m.calories} kcal</span></div>
+                    <div class="flex items-center justify-between"><span class="text-sm font-extrabold text-slate-900">${currentSelectedDate}(${m.dayName})</span><span class="text-xs font-extrabold text-blue-600 bg-blue-50 px-3 py-1 rounded-xl border border-blue-100">${m.calories} kcal</span></div>
                     <div class="space-y-2 max-h-[180px] overflow-y-auto custom-scrollbar pr-2">${list}</div>
                 </div>
                 <div class="bg-slate-50 rounded-2xl p-4 border border-slate-100 mt-4">
@@ -549,18 +528,18 @@
         async function triggerAiCoaching() {
             const box = document.getElementById('ai-response-box');
             if(!scrapedMeals[currentSelectedDate]) return;
-            box.innerHTML = `<div class="flex flex-col items-center py-16 space-y-3"><div class="loader"></div><p class="text-[10px] text-indigo-300 font-bold animate-pulse">Gemini Flash 모델 연산 중...</p></div>`;
+            box.innerHTML = `<div class="flex flex-col items-center py-16 space-y-3"><div class="loader"></div><p class="text-[10px] text-indigo-300 font-bold animate-pulse">Gemini 연산 중...</p></div>`;
             try {
                 const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`, {
                     method: 'POST', headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        contents: [{ parts: [{ text: `성일고 오늘 점심: ${scrapedMeals[currentSelectedDate].rawMenu} (${scrapedMeals[currentSelectedDate].calories}kcal). 집중력 보완 및 추천 저녁 식단 짧게 분석해줘.` }] }],
-                        systemInstruction: { parts: [{ text: `You are a high school nutritionist. Suggest study focus tips and dinner based on lunch. HTML lists only. Max 100 words in Korean.` }] }
+                        contents: [{ parts: [{ text: `성일고 오늘 점심: ${scrapedMeals[currentSelectedDate].rawMenu} (${scrapedMeals[currentSelectedDate].calories}kcal). 영양 보완 피드백과 저녁 메뉴 제안해줘.` }] }],
+                        systemInstruction: { parts: [{ text: `You are a school nutritionist. HTML lists only. Max 100 words in Korean.` }] }
                     })
                 });
                 const data = await res.json();
                 box.innerHTML = `<div class="text-indigo-100 text-[11px] leading-relaxed animate-fade-in">${data.candidates[0].content.parts[0].text}</div>`;
-            } catch(e) { box.innerHTML = `<p class="text-center py-10 text-rose-300">네트워크 수신 에러. 잠시 후 시도하세요.</p>`; }
+            } catch(e) { box.innerHTML = `<p class="text-center py-10 text-rose-300">네트워크 에러</p>`; }
         }
 
         function renderAllergySelectors() {
@@ -576,5 +555,4 @@
     </script>
 </body>
 </html>
-
 
