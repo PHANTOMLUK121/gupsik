@@ -343,7 +343,7 @@
 
         function triggerBackgroundTest() {
             if (Notification.permission !== 'granted') return showToast("먼저 알림 권한을 허용해 주세요!");
-            showToast("3초 뒤 서비스 워커 백그라운드 가상 테스트를 진행합니다.");
+            showToast("알림 전송중...");
             setTimeout(() => {
                 navigator.serviceWorker.ready.then(reg => {
                     if(reg.active) reg.active.postMessage({ type: 'SEND_TEST_ALARM' });
