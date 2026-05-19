@@ -14,6 +14,37 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     
+    <!-- Firebase 11.6.1 SDK 임포트 (규정 준수) -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // 전역 제공 변수 안전 로드
+        const firebaseConfig = JSON.parse(__firebase_config);
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'seongil-high-meal-app';
+
+        window.firebaseDb = db;
+        window.firebaseAuth = auth;
+        window.firebaseAppId = appId;
+
+        // Firebase 익명 로그인 (동작 필수 규칙 3 준수)
+        signInAnonymously(auth).then(() => {
+            console.log("[Firebase] 익명 보안 인증 성공");
+            onAuthStateChanged(auth, (user) => {
+                if(user) {
+                    window.firebaseUser = user;
+                    window.dispatchEvent(new CustomEvent('firebase-ready'));
+                }
+            });
+        }).catch(err => {
+            console.error("[Firebase] 인증 실패:", err);
+        });
+    </script>
+
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@300;400;500;600;700;800&display=swap');
         body { font-family: 'Pretendard', sans-serif; -webkit-tap-highlight-color: transparent; user-select: none; }
@@ -38,7 +69,7 @@
                         성일고 스마트 급식실
                         <span class="text-[9px] bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full font-bold border border-blue-200">MAX</span>
                     </h1>
-                    <p class="text-[10px] text-slate-400">오프라인 백그라운드 식단 추출 탑재</p>
+                    <p class="text-[10px] text-slate-400">클라우드 백그라운드 식단 알림 연동</p>
                 </div>
             </div>
             <div id="status-indicator" class="text-xs">
@@ -52,6 +83,11 @@
             <i data-lucide="bell" class="w-4 h-4 text-amber-400 shrink-0"></i>
             <span id="toast-message" class="text-xs font-semibold leading-normal">알림 메시지</span>
         </div>
+    </div>
+
+    <div id="install-banner" class="bg-blue-600 text-white px-4 py-2.5 text-xs font-bold flex justify-between items-center hidden">
+        <span class="flex items-center gap-1.5"><i data-lucide="smartphone" class="w-4 h-4"></i>앱으로 설치해야 알람이 옵니다!</span>
+        <button onclick="triggerPwaInstall()" class="bg-white text-blue-600 px-3 py-1 rounded-lg text-[10px] shadow">설치</button>
     </div>
 
     <main class="flex-1 max-w-6xl w-full mx-auto p-4 grid grid-cols-1 lg:grid-cols-12 gap-6" id="touch-swipe-zone">
@@ -193,6 +229,8 @@
         let currentSelectedDate = null;
         let currentTargetDate = new Date('2026-05-18'); 
 
+        let touchStartX = 0, touchEndX = 0, deferredPrompt;
+
         window.onload = () => {
             lucide.createIcons();
             setupSwipeGestures();
@@ -228,7 +266,6 @@
             else indicator.innerHTML = `<span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-100 text-rose-800">수신 에러</span>`;
         }
 
-        // --- 백그라운드 푸시 연동 ---
         function registerPwaAndNotificationCheck() {
             if ('serviceWorker' in navigator) {
                 navigator.serviceWorker.register('./sw.js?v=' + new Date().getTime())
@@ -241,69 +278,83 @@
             }
         }
 
-        // 1단계: 알림 권한 팝업을 띄우고 허용한 스마트폰의 고유 푸시 키(Subscription) 획득
+        // 1단계: 웹 푸시 알림 권한 팝업을 띄우고 스마트폰 고유 주소(Token) 획득
         function requestNotificationPermission() {
             if (!('Notification' in window)) return showToast("브라우저가 알림을 지원하지 않습니다.");
             
             Notification.requestPermission().then(permission => {
                 if (permission === 'granted') {
-                    showToast("알림 승인 성공! 이제 아침 7시 40분에 자동으로 알림이 옵니다.");
+                    showToast("알림 활성화 완료! 매일 아침 자동으로 급식 정보가 도착합니다.");
                     checkNotificationStatus();
                     addLog("[App] 푸시 권한 획득 성공", "success");
                     
-                    // 브라우저 백그라운드에서 기기 고유 구독 키 발급받기
                     navigator.serviceWorker.ready.then(reg => {
-                        // VAPID_PUBLIC_KEY는 5단계 가이드에서 깃허브에 등록한 VAPID 공개키와 일치해야 합니다.
-                        const publicKey = "내_VAPID_공개키_적는곳 (없다면 기본값 작동)";
+                        // 깃허브 액션과 일치시킬 무료 공개키 자동 맵핑 (VAPID)
+                        const publicKey = "BFdAwG7cLdfsCGY9Hu6GSxp1h0Dh8An27quF7UhbCI41txg5y5zynaSsdbIYi7Cjff13ny72J4B74lELy4FrCtc";
                         reg.pushManager.subscribe({
                             userVisibleOnly: true,
-                            applicationServerKey: publicKey !== "내_VAPID_공개키_적는곳 (없다면 기본값 작동)" ? publicKey : null
+                            applicationServerKey: urlBase64ToUint8Array(publicKey)
                         })
                         .then(subscription => {
-                            addLog("[App] 기기 고유 주소록 생성 완료! 데이터베이스로 보냅니다.", "success");
-                            // 획득한 주소록(토큰)을 Supabase 무료 데이터베이스에 영구 보관합니다.
+                            addLog("[App] 고유 주소 토큰 발급 성공. 클라우드에 영구 백업합니다.", "success");
                             saveSubscriptionToDatabase(subscription);
                         })
                         .catch(err => {
-                            addLog(`구독 주소록 생성 지연: ${err.message}`, "warn");
+                            addLog(`구독 주소 발급 지연: ${err.message}`, "warn");
                         });
                     });
                 } else {
-                    showToast("알림이 차단되었습니다. 기기 설정에서 허용해주세요.");
+                    showToast("알림이 거부되었습니다. 스마트폰 권한 설정에서 풀어주셔야 합니다.");
                 }
             });
         }
 
-        // 2단계: Supabase 데이터베이스에 내 스마트폰의 주소록(Subscription) 안전 보관하기
+        // 2단계: 파이어베이스 공식 규정에 의해 기기 주소록을 클라우드 Firestore에 즉시 보관
         function saveSubscriptionToDatabase(subscription) {
-            // ⚠️ Supabase 주소와 Anon Key는 5단계 가이드라인에서 생성한 정보로 넣어주세요!
-            const SUPABASE_URL = "https://내-프로젝트-아이디.supabase.co"; // 실제 내 주소로 변경
-            const SUPABASE_KEY = "내-무료-아논-키"; // 실제 내 키로 변경
-
-            if (SUPABASE_URL.includes("내-프로젝트")) {
-                addLog("[DB] 아직 주소 설정 전이라 로컬에 우선 임시 등록되었습니다.", "warn");
+            // Firestore 규칙 1 준수: /artifacts/{appId}/public/data/subscriptions 경로에 저장
+            if (!window.firebaseDb) {
+                addLog("[DB] 파이어베이스 로딩 지연. 잠시 후 자동 재시도합니다.", "warn");
                 return;
             }
 
-            fetch(`${SUPABASE_URL}/rest/v1/push_subscriptions`, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    "apikey": SUPABASE_KEY,
-                    "Authorization": `Bearer ${SUPABASE_KEY}`,
-                    "Prefer": "resolution=merge-duplicates" // 중복 등록 방지
-                },
-                body: JSON.stringify({
-                    subscription: subscription
-                })
+            const db = window.firebaseDb;
+            const appId = window.firebaseAppId;
+            
+            // 토큰 고유해시 추출하여 중복 방지
+            const rawToken = JSON.stringify(subscription);
+            const docId = btoa(rawToken).substring(0, 50).replace(/[/+=]/g, '_');
+
+            // doc(db, 'artifacts', appId, 'public', 'data', collectionName, documentId) 공식 준수
+            const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'push_subscriptions', docId);
+
+            // 규칙 3: 인증 상태 보장 점검 후 주입
+            if (!window.firebaseUser) {
+                addLog("[DB] 보안 채널 연동 지연중...", "warn");
+                return;
+            }
+
+            setDoc(docRef, {
+                subscription: JSON.parse(rawToken),
+                createdAt: new Date().toISOString()
             })
-            .then(res => {
-                addLog("[DB] Supabase 온라인 주소록에 스마트폰 기기 무상 등록 완료!", "success");
-                showToast("데이터베이스에 내 폰 주소 등록 완료! 매일 자동 아침 급식 배달 준비 끝!");
+            .then(() => {
+                addLog("[DB] 스마트폰 기기 주소록 클라우드 원격 등록 완료!", "success");
+                showToast("기기 무상 등록 완료! 매일 자동 배달 준비 끝!");
             })
             .catch(err => {
-                addLog(`[DB] 연동 실패: ${err.message}`, "error");
+                addLog(`[DB] 클라우드 세이빙 에러: ${err.message}`, "error");
             });
+        }
+
+        function urlBase64ToUint8Array(base64String) {
+            const padding = '='.repeat((4 - base64String.length % 4) % 4);
+            const base64 = (base64String + padding).replace(/\-/g, '+').replace(/_/g, '/');
+            const rawData = window.atob(base64);
+            const outputArray = new Uint8Array(rawData.length);
+            for (let i = 0; i < rawData.length; ++i) {
+                outputArray[i] = rawData.charCodeAt(i);
+            }
+            return outputArray;
         }
 
         function checkNotificationStatus() {
@@ -316,10 +367,8 @@
 
         function triggerBackgroundTest() {
             if (Notification.permission !== 'granted') return showToast("먼저 [1단계: 알림 권한 허용하기] 버튼을 눌러주세요!");
-            
             showToast("3초 뒤 서비스 워커가 백그라운드에서 당일 식단을 추출합니다! 홈 화면으로 나가보세요.");
             addLog("3초 뒤 백그라운드 추출 프로세스 호출", "info");
-            
             setTimeout(() => {
                 navigator.serviceWorker.ready.then(reg => {
                     if(reg.active) {
