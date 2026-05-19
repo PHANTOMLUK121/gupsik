@@ -420,11 +420,11 @@
             const wd = ["월", "화", "수", "목", "금"];
             const y = parseInt(range.fromStr.substring(0,4)), m = parseInt(range.fromStr.substring(4,6))-1, d = parseInt(range.fromStr.substring(6,8));
             const preset = [
-                {m: "정보 없음, 정보 없음, 정보 없음, 정보 없음", c: 835, n: {carbo: 112, protein: 29, fat: 24}},
-                {m: "정보 없음, 정보 없음, 정보 없음, 정보 없음", c: 790, n: {carbo: 98, protein: 34, fat: 20}},
-                {m: "정보 없음, 정보 없음, 정보 없음, 정보 없음", c: 865, n: {carbo: 121, protein: 25, fat: 27}},
-                {m: "정보 없음, 정보 없음, 정보 없음, 정보 없음", c: 820, n: {carbo: 104, protein: 32, fat: 21}},
-                {m: "정보 없음, 정보 없음, 정보 없음, 정보 없음", c: 910, n: {carbo: 128, protein: 28, fat: 29}}
+                {m: "정보 없음, 정보 없음, 정보 없음, 정보 없음", c: 0, n: {carbo: 0, protein: 0, fat: 0}},
+                {m: "정보 없음, 정보 없음, 정보 없음, 정보 없음", c: 0, n: {carbo: 0, protein: 0, fat: 0}},
+                {m: "정보 없음, 정보 없음, 정보 없음, 정보 없음", c: 0, n: {carbo: 0, protein: 0, fat: 0}},
+                {m: "정보 없음, 정보 없음, 정보 없음, 정보 없음", c: 0, n: {carbo: 0, protein: 0, fat: 0}},
+                {m: "정보 없음, 정보 없음, 정보 없음, 정보 없음", c: 0, n: {carbo: 0, protein: 0, fat: 0}}
             ];
             scrapedMeals = {};
             for(let i=0; i<5; i++) {
