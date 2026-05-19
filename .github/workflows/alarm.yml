@@ -3,10 +3,8 @@ name: Seongil High School Daily Meal Push Notification
 
 on:
   schedule:
-    # 깃허브 액션은 전세계 기준시(UTC)를 사용하여 한국시보다 9시간 느립니다.
-    # 매일 아침 7시 35분(한국 시간)에 자동으로 실행되도록 스케줄링합니다. (22:35 UTC)
-    - cron: '35 22 * * *'
-  workflow_dispatch: # 관리자가 원할 때 언제든 깃허브 사이트에서 [수동 테스트 발송]을 누를 수 있는 버튼 활성화
+    - cron: '35 22 * * *' # 매일 아침 7시 35분 (한국 시간)
+  workflow_dispatch: # 수동 강제 테스트 버튼 생성
 
 jobs:
   send-push:
@@ -23,15 +21,13 @@ jobs:
       - name: Install Push Libraries
         run: |
           npm init -y
-          npm install web-push @supabase/supabase-js node-fetch@2
+          npm install web-push firebase-admin node-fetch@2
 
       - name: Execute Notification Sender Script
         env:
-          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
-          SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
           VAPID_PUBLIC_KEY: ${{ secrets.VAPID_PUBLIC_KEY }}
           VAPID_PRIVATE_KEY: ${{ secrets.VAPID_PRIVATE_KEY }}
           VAPID_EMAIL: ${{ secrets.VAPID_EMAIL }}
         run: node send-alarm.js
-
 
