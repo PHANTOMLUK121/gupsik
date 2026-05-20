@@ -19,7 +19,15 @@
         import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        const firebaseConfig = JSON.parse(__firebase_config);
+        const firebaseConfig = {
+            apiKey: "AIzaSyC-xQf2V4wn9H6xX_UgnYnpgbq3Rb1enzw",
+            authDomain: "gupsik-6f330.firebaseapp.com",
+            projectId: "gupsik-6f330",
+            storageBucket: "gupsik-6f330.firebasestorage.app",
+            messagingSenderId: "715891972196",
+            appId: "1:715891972196:web:315e3ac7e1e0760f20a771",
+            measurementId: "G-836WTX88GB"
+        };
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
