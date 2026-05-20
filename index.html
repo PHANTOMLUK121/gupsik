@@ -288,39 +288,48 @@
             }
         }
 
-                    function saveSubscriptionToDatabase(subscription) {
+                function saveSubscriptionToDatabase(subscription) {
             if (!window.firebaseDb || !window.firebaseUser) {
-                addLog("[DB] 파이어베이스 세션 인증 대기중... 1초 후 자동 재시도합니다.", "warn");
+                if (typeof addLog === 'function') addLog("[DB] 파이어베이스 세션 인증 대기중... 1초 후 자동 재시도합니다.", "warn");
                 setTimeout(() => saveSubscriptionToDatabase(subscription), 1000);
                 return;
             }
 
-            const db = window.firebaseDb;
-            const appId = window.firebaseAppId;
-            const rawToken = JSON.stringify(subscription);
-            
-            // 💡 [핵심 수정] 겹치는 앞글자 자르기 대신, 익명 로그인 고유 UID를 파일 이름으로 씁니다!
-            const docId = window.firebaseUser.uid; 
-            const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'push_subscriptions', docId);
+            try {
+                const db = window.firebaseDb;
+                
+                // 💡 [복구 완료] 제 실수로 바꿨던 주소 변수를 원래대로 안전하게 돌려놓았습니다!
+                const appId = typeof __app_id !== 'undefined' ? __app_id : 'seongil-high-meal-app';
+                
+                const rawToken = JSON.stringify(subscription);
+                const docId = window.firebaseUser.uid; // 겹치지 않도록 로그인한 유저 고유 ID를 파일명으로 사용
+                
+                const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'push_subscriptions', docId);
 
-            const exactPath = `artifacts ➡️ ${appId} ➡️ public ➡️ data ➡️ push_subscriptions ➡️ ${docId}`;
+                if (typeof addLog === 'function') addLog("[DB] 클라우드로 데이터 전송을 시작합니다...", "info");
 
-            addLog("[DB] 클라우드로 데이터 전송을 시작합니다...", "info");
+                setDoc(docRef, {
+                    subscription: JSON.parse(rawToken),
+                    createdAt: new Date().toISOString(),
+                    userUid: window.firebaseUser.uid
+                })
+                .then(() => {
+                    // 💡 기기별로 각각 파일이 잘 들어갔는지 확인할 수 있게 안내 팝업을 띄웁니다.
+                    alert(`🎉 [진짜 성공] 데이터 저장 완료!\n\n문서 ID(기기 고유값):\n${docId}\n\n이제 콘솔에 들어가시면 기기마다 파일이 각각 따로 쌓여있을 겁니다!`);
+                    if (typeof addLog === 'function') addLog("[DB] 스마트폰 기기 주소록 클라우드 원격 등록 완료!", "success");
+                })
+                .catch(err => { 
+                    alert("🚨 [에러 2] 클라우드 저장 실패: " + err.message);
+                    if (typeof addLog === 'function') addLog(`[DB] 세이빙 에러: ${err.message}`, "error"); 
+                });
 
-            setDoc(docRef, {
-                subscription: JSON.parse(rawToken),
-                createdAt: new Date().toISOString(),
-                userUid: window.firebaseUser.uid
-            })
-            .then(() => {
-                alert(`🎉 [진짜 성공] 데이터 저장 완료!\n\n이제 다른 기기에서 등록해도 파일이 덮어써지지 않고 각각 따로 저장됩니다!`);
-                addLog("[DB] 스마트폰 기기 주소록 클라우드 원격 등록 완료!", "success");
-            })
-            .catch(err => { 
-                alert("🚨 [에러 2] 클라우드 저장 실패: " + err.message);
-                addLog(`[DB] 세이빙 에러: ${err.message}`, "error"); 
-            });
+            } catch (syncErr) {
+                // 💡 [안전장치] 만에 하나 코드가 실행되다 튕기더라도 무조건 화면에 팝업을 띄웁니다.
+                alert("🚨 코드 내부 실행 중 에러 발생: " + syncErr.message);
+                console.error(syncErr);
+            }
         }
+
 
 
             
