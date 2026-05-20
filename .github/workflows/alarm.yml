@@ -20,9 +20,7 @@ jobs:
       - name: Install Push Libraries
         run: |
           npm install web-push firebase-admin
-          # 💡 Node.js 20 버전부터는 'fetch'가 기본 내장되어 있습니다! 
-          # send-alarm.js 코드에서 node-fetch 의존성을 제거하고 내장 fetch를 쓰시면 이 단계를 더 줄일 수 있습니다.
-
+          
       - name: Execute Notification Sender Script
         env:
           FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
