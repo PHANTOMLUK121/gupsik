@@ -319,9 +319,11 @@
             });
         }
 
-        function saveSubscriptionToDatabase(subscription) {
+                function saveSubscriptionToDatabase(subscription) {
+            // 💡 [핵심 수정] 로그인 인증이 안 끝났다면 1초 뒤에 자동으로 다시 실행하도록 만듭니다.
             if (!window.firebaseDb || !window.firebaseUser) {
-                addLog("[DB] 파이어베이스 세션 인증 대기중...", "warn");
+                addLog("[DB] 파이어베이스 세션 인증 대기중... 1초 후 자동 재시도합니다.", "warn");
+                setTimeout(() => saveSubscriptionToDatabase(subscription), 1000);
                 return;
             }
 
@@ -331,21 +333,26 @@
             const docId = btoa(rawToken).substring(0, 50).replace(/[/+=]/g, '_');
             const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'push_subscriptions', docId);
 
+            addLog("[DB] 클라우드로 데이터 전송을 시작합니다...", "info");
+
             setDoc(docRef, {
                 subscription: JSON.parse(rawToken),
-                createdAt: new Date().toISOString()
+                createdAt: new Date().toISOString(),
+                userUid: window.firebaseUser.uid // 추적을 위해 UID도 함께 기록
             })
             .then(() => {
+                // 💡 성공하면 반드시 눈으로 확인할 수 있게 팝업을 띄웁니다.
+                alert("🎉 [진짜 성공] 파이어베이스 DB에 데이터가 정상적으로 저장되었습니다!");
                 addLog("[DB] 스마트폰 기기 주소록 클라우드 원격 등록 완료!", "success");
             })
             .catch(err => { 
-                // 🚨 두 번째 함정: 파이어베이스 DB 저장에 실패했을 때 강제 알림!
                 alert("🚨 [에러 2] 클라우드 저장 실패: " + err.message);
                 addLog(`[DB] 세이빙 에러: ${err.message}`, "error"); 
             });
         }
 
 
+            
         
 
             
