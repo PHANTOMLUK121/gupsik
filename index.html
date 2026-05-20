@@ -567,6 +567,42 @@
         function applyPreset(p) { PRESETS[p].forEach(c=>activeAllergies.add(c)); renderAllergySelectors(); renderWeeklyView(); renderDailyDetail(); showToast("필터 반영 완료"); }
         function resetAllergyFilters() { activeAllergies.clear(); renderAllergySelectors(); renderWeeklyView(); renderDailyDetail(); }
         function loadAllergiesFromStorage() { const s = localStorage.getItem('seongil_allergy_set'); if(s) activeAllergies = new Set(JSON.parse(s)); }
+
+        // PWA 설치 이벤트를 담아둘 변수
+let deferredPrompt;
+const installBanner = document.getElementById('install-banner');
+
+// 브라우저가 PWA 설치 조건을 만족했을 때 발생하는 이벤트
+window.addEventListener('beforeinstallprompt', (e) => {
+    // 기본으로 뜨는 브라우저 팝업을 일단 막고
+    e.preventDefault();
+    // 이벤트를 보관해 둠
+    deferredPrompt = e;
+    // 숨겨져 있던 파란색 커스텀 설치 배너를 짠! 하고 보여줌
+    installBanner.classList.remove('hidden');
+    addLog("[App] 앱 설치 준비 완료", "info");
+});
+
+// 사용자가 [설치] 버튼을 눌렀을 때 실행될 함수
+function triggerPwaInstall() {
+    // 버튼을 누르면 배너는 다시 숨김
+    installBanner.classList.add('hidden');
+    if (deferredPrompt) {
+        // 보관해둔 설치 팝업을 띄움
+        deferredPrompt.prompt();
+        // 사용자가 설치를 수락했는지 거절했는지 확인
+        deferredPrompt.userChoice.then((choiceResult) => {
+            if (choiceResult.outcome === 'accepted') {
+                console.log('사용자가 PWA 설치를 동의했습니다.');
+                addLog("[App] 기기에 앱 설치 완료!", "success");
+            } else {
+                console.log('사용자가 PWA 설치를 거절했습니다.');
+            }
+            deferredPrompt = null;
+        });
+    }
+}
+
     </script>
 </body>
 </html>
