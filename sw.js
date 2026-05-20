@@ -1,7 +1,18 @@
-
 const CACHE_NAME = 'seongil-smart-meal-v6';
 
+// [수정] PWA 설치 필수 조건: 파일 기본 캐싱 설정
+const PRECACHE_ASSETS = [
+    './index.html',
+    './manifest.json'
+];
+
 self.addEventListener('install', function(event) {
+    // 설치 시점에 필수 파일 캐싱
+    event.waitUntil(
+        caches.open(CACHE_NAME).then(function(cache) {
+            return cache.addAll(PRECACHE_ASSETS);
+        })
+    );
     self.skipWaiting();
 });
 
@@ -9,8 +20,21 @@ self.addEventListener('activate', function(event) {
     event.waitUntil(self.clients.claim());
 });
 
+/**
+ * 🔥 [핵심 추가] 브라우저가 PWA 설치 팝업을 띄우게 만드는 필수 fetch 핸들러
+ * 기존 앱 동작에 영향을 주지 않도록 네트워크 우선 방식으로 안전하게 처리했습니다.
+ */
+self.addEventListener('fetch', function(event) {
+    event.respondWith(
+        fetch(event.request).catch(function() {
+            return caches.match(event.request);
+        })
+    );
+});
+
+// 여기서부터는 기존에 작성하신 소중한 코드들 그대로 유지됩니다 👇
+
 async function fetchAndShowMealNotification() {
-    
     const now = new Date();
     const dayOfWeek = now.getDay();
     let targetDate = new Date(now);
@@ -66,7 +90,6 @@ self.addEventListener('push', function(event) {
 
 self.addEventListener('message', function(event) {
     if (event.data && event.data.type === 'SEND_TEST_ALARM') {
-        
         if (event.data.title && event.data.body) {
             self.registration.showNotification(event.data.title, {
                 body: event.data.body,
@@ -74,7 +97,6 @@ self.addEventListener('message', function(event) {
                 vibrate: [200, 50, 200]
             });
         } else {
-            
             event.waitUntil(fetchAndShowMealNotification());
         }
     }
