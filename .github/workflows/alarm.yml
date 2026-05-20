@@ -3,7 +3,7 @@ name: Seongil High School Daily Meal Push Notification
 
 on:
   schedule:
-    - cron: '50 01 * * *' # 매일 아침 7시 35분 (한국 시간)
+    - cron: '40 01 * * *' # 매일 아침 7시 35분 (한국 시간)
   workflow_dispatch: # 수동 강제 테스트 버튼 생성
 
 jobs:
