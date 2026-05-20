@@ -288,7 +288,7 @@
             }
         }
 
-                        function saveSubscriptionToDatabase(subscription) {
+                    function saveSubscriptionToDatabase(subscription) {
             if (!window.firebaseDb || !window.firebaseUser) {
                 addLog("[DB] 파이어베이스 세션 인증 대기중... 1초 후 자동 재시도합니다.", "warn");
                 setTimeout(() => saveSubscriptionToDatabase(subscription), 1000);
@@ -314,40 +314,6 @@
             })
             .then(() => {
                 alert(`🎉 [진짜 성공] 데이터 저장 완료!\n\n이제 다른 기기에서 등록해도 파일이 덮어써지지 않고 각각 따로 저장됩니다!`);
-                addLog("[DB] 스마트폰 기기 주소록 클라우드 원격 등록 완료!", "success");
-            })
-            .catch(err => { 
-                alert("🚨 [에러 2] 클라우드 저장 실패: " + err.message);
-                addLog(`[DB] 세이빙 에러: ${err.message}`, "error"); 
-            });
-        }
-
-                        function saveSubscriptionToDatabase(subscription) {
-            if (!window.firebaseDb || !window.firebaseUser) {
-                addLog("[DB] 파이어베이스 세션 인증 대기중... 1초 후 자동 재시도합니다.", "warn");
-                setTimeout(() => saveSubscriptionToDatabase(subscription), 1000);
-                return;
-            }
-
-            const db = window.firebaseDb;
-            const appId = window.firebaseAppId;
-            const rawToken = JSON.stringify(subscription);
-            const docId = btoa(rawToken).substring(0, 50).replace(/[/+=]/g, '_');
-            const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'push_subscriptions', docId);
-
-            // 💡 실제 저장되는 경로를 문자열로 만들어 둡니다.
-            const exactPath = `artifacts ➡️ ${appId} ➡️ public ➡️ data ➡️ push_subscriptions ➡️ ${docId}`;
-
-            addLog("[DB] 클라우드로 데이터 전송을 시작합니다...", "info");
-
-            setDoc(docRef, {
-                subscription: JSON.parse(rawToken),
-                createdAt: new Date().toISOString(),
-                userUid: window.firebaseUser.uid
-            })
-            .then(() => {
-                // 💡 [핵심] 성공 팝업에 실제 프로젝트 ID와 컴퓨터가 쓴 경로를 그대로 출력합니다.
-                alert(`🎉 [진짜 성공] 데이터 저장 완료!\n\n 프로젝트: gupsik-6f330\n\n[콘솔에서 찾아야 할 진짜 경로]:\n${exactPath}`);
                 addLog("[DB] 스마트폰 기기 주소록 클라우드 원격 등록 완료!", "success");
             })
             .catch(err => { 
