@@ -36,6 +36,8 @@
         window.firebaseDb = db;
         window.firebaseAuth = auth;
         window.firebaseAppId = appId;
+        window.doc = doc;
+        window.setDoc = setDoc;
 
         signInAnonymously(auth).then(() => {
             console.log("[Firebase] 익명 보안 인증 성공");
