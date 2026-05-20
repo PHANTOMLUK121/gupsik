@@ -45,7 +45,7 @@
 </head>
 <body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col items-center justify-between pb-24">
 
-    <!-- 상단 앱 네비게이션 헤더 -->
+    <!-- 상단 앱 네비게이션 헤더 (진단버튼 제거, 본래 디자인 복구) -->
     <header class="w-full max-w-md bg-white border-b border-slate-100 p-5 sticky top-0 z-10 shadow-sm flex items-center justify-between">
         <div class="flex items-center gap-3">
             <div class="w-10 h-10 bg-blue-500 rounded-xl flex items-center justify-center text-white shadow-md shadow-blue-200">
@@ -56,49 +56,10 @@
                 <p class="text-xs text-slate-400">PWA 스마트 알림판</p>
             </div>
         </div>
-        <!-- 🧪 실시간 상태 진단 패널 토글 버튼 -->
-        <button id="btn-toggle-debug" class="px-3 py-1.5 bg-slate-100 text-slate-600 hover:bg-blue-50 hover:text-blue-600 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 border border-slate-200">
-            <i data-lucide="activity" class="w-3.5 h-3.5"></i>
-            진단 도구
-        </button>
     </header>
 
     <!-- 메인 대시보드 화면 -->
     <main class="w-full max-w-md px-5 py-6 flex-1 flex flex-col gap-6 justify-center">
-
-        <!-- 📊 [실시간 디버깅 & 자가진단 패널] -->
-        <div id="debug-panel" class="bg-slate-900 text-slate-100 rounded-2xl p-5 shadow-lg border border-slate-800 hidden flex flex-col gap-4">
-            <div class="flex items-center justify-between border-b border-slate-800 pb-3">
-                <div class="flex items-center gap-1.5 text-amber-400 font-bold text-xs">
-                    <i data-lucide="shield-alert" class="w-4 h-4"></i>
-                    PWA 설치 자가 진단 현황
-                </div>
-                <span id="debug-status" class="text-[10px] text-slate-500">실시간 감지 중</span>
-            </div>
-            
-            <ul class="flex flex-col gap-2.5 text-xs">
-                <li class="flex items-center justify-between">
-                    <span class="text-slate-400">1. 보안 프로토콜 (HTTPS)</span>
-                    <span id="chk-https" class="font-bold text-slate-500">대기 중</span>
-                </li>
-                <li class="flex items-center justify-between">
-                    <span class="text-slate-400">2. 설정 파일 (manifest.json)</span>
-                    <span id="chk-manifest" class="font-bold text-slate-500">대기 중</span>
-                </li>
-                <li class="flex items-center justify-between">
-                    <span class="text-slate-400">3. 서비스 워커 백그라운드</span>
-                    <span id="chk-sw" class="font-bold text-slate-500">대기 중</span>
-                </li>
-                <li class="flex items-center justify-between">
-                    <span class="text-slate-400">4. 전용 아이콘 이미지</span>
-                    <span id="chk-icons" class="font-bold text-slate-500">대기 중</span>
-                </li>
-                <li class="flex items-center justify-between border-t border-slate-800/50 pt-2 font-semibold">
-                    <span class="text-amber-300">5. 브라우저 설치 권한 허용</span>
-                    <span id="chk-prompt" class="text-red-400">❌ 미획득</span>
-                </li>
-            </ul>
-        </div>
 
         <!-- 급식 카드 UI -->
         <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 flex flex-col gap-4">
@@ -136,7 +97,7 @@
         © 2026 성일고등학교 급식 도우미
     </footer>
 
-    <!-- 🌟 [PWA 수동 설치 유도 배너] 사용자 스크립트와 100% 매핑된 HTML 레이아웃 -->
+    <!-- 🌟 [PWA 수동 설치 유도 배너] -->
     <div id="pwa-install-banner">
         <div style="display: flex; align-items: center; gap: 12px;">
             <img src="/icon-192.png" alt="앱 아이콘" style="width: 48px; height: 48px; border-radius: 12px; object-fit: cover;" onerror="this.src='https://cdn-icons-png.flaticon.com/512/3211/3211425.png'">
@@ -201,15 +162,11 @@
                 navigator.serviceWorker.register('/firebase-messaging-sw.js')
                 .then((reg) => {
                     console.log('✅ [PWA] 서비스 워커 등록 성공: ', reg.scope);
-                    updateDiag("sw", "🟢 통과", "text-emerald-400");
                 })
                 .catch((err) => {
                     console.error('❌ [PWA] 서비스 워커 등록 실패: ', err);
-                    updateDiag("sw", "🔴 실패 (파일 없음)", "text-red-400");
                 });
             });
-        } else {
-            updateDiag("sw", "🔴 미지원 브라우저", "text-red-400");
         }
 
         // -------------------------------------------------------------------------
@@ -225,8 +182,6 @@
             e.preventDefault(); 
             deferredPrompt = e;  
             
-            // 진단 패널 및 배너 활성화
-            updateDiag("prompt", "🟢 통과", "text-emerald-400");
             if (installBanner) {
                 installBanner.classList.add('show');
             }
@@ -270,43 +225,6 @@
         });
 
         // -------------------------------------------------------------------------
-        // 🛠️ 실시간 자가진단 분석용 서브 유틸 프로그램
-        // -------------------------------------------------------------------------
-        const debugPanel = document.getElementById('debug-panel');
-        document.getElementById('btn-toggle-debug').addEventListener('click', () => {
-            debugPanel.classList.toggle('hidden');
-        });
-
-        function runSelfDiagnosis() {
-            // HTTPS 확인
-            if (window.location.protocol === 'https:' || window.location.hostname === 'localhost') {
-                updateDiag("https", "🟢 통과", "text-emerald-400");
-            } else {
-                updateDiag("https", "🔴 실패 (HTTP 연결)", "text-red-400");
-            }
-
-            // manifest.json 읽기 테스트
-            fetch('/manifest.json')
-            .then(r => r.ok ? updateDiag("manifest", "🟢 통과", "text-emerald-400") : updateDiag("manifest", "🔴 실패 (404 없음)", "text-red-400"))
-            .catch(() => updateDiag("manifest", "🔴 로딩 실패", "text-red-400"));
-
-            // 아이콘 이미지 실재 검증
-            const img = new Image();
-            img.src = "/icon-192.png";
-            img.onload = () => updateDiag("icons", "🟢 통과", "text-emerald-400");
-            img.onerror = () => updateDiag("icons", "🔴 실패 (파일 누락)", "text-red-400");
-        }
-
-        function updateDiag(id, msg, cls) {
-            const el = document.getElementById(`chk-${id}`);
-            if (el) {
-                el.innerText = msg;
-                el.className = `font-bold ${cls}`;
-            }
-        }
-        runSelfDiagnosis();
-
-        // -------------------------------------------------------------------------
         // 🔔 급식 알림 신청 로직 (파이어베이스 Firestore DB 저장 연동)
         // -------------------------------------------------------------------------
         const btnSubscribe = document.getElementById('btn-subscribe');
@@ -343,7 +261,7 @@
                 alert('🎉 성일고 급식 푸시 알림 신청이 성공적으로 완료되었습니다! 이제 아침 7시 35분에 알림이 전달됩니다.');
             } catch (err) {
                 console.error("구독 신청 및 저장 실패: ", err);
-                alert('알림 등록 도중 에러가 발생했습니다. 서비스 워커 상태를 진단 도구로 점검해 주세요.');
+                alert('알림 등록 도중 에러가 발생했습니다. 서비스 워커가 정상적으로 작동하고 있는지 점검해 주세요.');
             }
         });
 
@@ -359,7 +277,7 @@
             return outputArray;
         }
 
-        // 오늘 날짜 채우기 및 NEIS 급식 간단 로딩 시뮬레이션
+        // 오늘 날짜 채우기 및 NEIS 급식 간단 로딩
         const dateText = new Date().toISOString().slice(0, 10);
         document.getElementById('current-date-text').innerText = dateText;
         const targetDateStr = dateText.replace(/-/g, '');
