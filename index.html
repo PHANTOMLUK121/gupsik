@@ -604,50 +604,54 @@
     <div id="pwa-install-banner">
         <div style="display: flex; align-items: center; gap: 12px;">
             <!-- 업로드하신 파란 종 아이콘 연결 -->
-            <img src="/icon-192.png" alt="앱 아이콘" style="width: 48px; height: 48px; border-radius: 12px; object-fit: cover;" onerror="this.src='https://cdn-icons-png.flaticon.com/512/3211/3211425.png'">
-            <div>
-                <h4 style="margin: 0; font-size: 14px; font-weight: bold; color: #0f172a;">성일고 급식 앱 설치</h4>
-                <p style="margin: 3px 0 0 0; font-size: 11px; color: #64748b;">바탕화면에 설치하고 알림을 빠르게 받아보세요!</p>
+                <img src="/icon-192.png" alt="앱 아이콘" style="width: 48px; height: 48px; border-radius: 12px; object-fit: cover;" onerror="this.src='https://cdn-icons-png.flaticon.com/512/3211/3211425.png'">
+                <div>
+                    <h4 style="margin: 0; font-size: 14px; font-weight: bold; color: #0f172a;">성일고 급식 앱 설치</h4>
+                    <p style="margin: 3px 0 0 0; font-size: 11px; color: #64748b;">바탕화면에 설치하고 알림을 빠르게 받아보세요!</p>
+                </div>
             </div>
-        </div>
         <div style="display: flex; align-items: center; gap: 8px;">
-            <button id="btn-pwa-install" style="background-color: #0078d4; color: white; border: none; padding: 8px 16px; border-radius: 8px; font-size: 12px; font-weight: bold; cursor: pointer;">설치</button>
-            <button id="btn-pwa-close" style="background: none; border: none; color: #94a3b8; font-size: 20px; cursor: pointer; padding: 0 5px;">&times;</button>
+             <button id="btn-pwa-install" style="background-color: #0078d4; color: white; border: none; padding: 8px 16px; border-radius: 8px; font-size: 12px; font-weight: bold; cursor: pointer;">설치</button>
+             <button id="btn-pwa-close" style="background: none; border: none; color: #94a3b8; font-size: 20px; cursor: pointer; padding: 0 5px;">&times;</button>
         </div>
-    </div>
+      </div>
 
     <script>
-        let deferredPrompt;
-        const installBanner = document.getElementById('pwa-install-banner');
-        const installBtn = document.getElementById('btn-pwa-install');
-        const closeBtn = document.getElementById('btn-pwa-close');
+         let deferredPrompt;
+         const installBanner = document.getElementById('pwa-install-banner');
+         const installBtn = document.getElementById('btn-pwa-install');
+         const closeBtn = document.getElementById('btn-pwa-close');
 
         // 브라우저가 앱 설치 가능한 웹사이트 환경임을 감지했을 때 실행
+        
         window.addEventListener('beforeinstallprompt', (e) => {
             // 브라우저 기본 설치 대화상자가 먼저 멋대로 뜨는 것을 방지
-            e.preventDefault();
+           
+        e.preventDefault();
             // 해당 대화상자 이벤트를 나중을 위해 보관
             deferredPrompt = e;
             
             // 화면 아래에서 슬며시 팝업 배너를 노출시킵니다.
             console.log("PWA 설치 기준 충족이 확인되어 안내 배너를 활성화합니다.");
+                
             installBanner.classList.add('show');
         });
 
         // 사용자가 배너에서 [설치] 단추를 터치했을 때 실행
         installBtn.addEventListener('click', async () => {
-            if (!deferredPrompt) return;
+               
+        if (!deferredPrompt) return;
             
             // 아까 임시 저장해 두었던 설치 대화상자를 전면 화면으로 호출!
-            deferredPrompt.prompt();
+             deferredPrompt.prompt();
             
             // 사용자의 선택 결과를 모니터링
-            const { outcome } = await deferredPrompt.userChoice;
-            console.log(`PWA 설치 프로세스 결과: ${outcome}`);
+             const { outcome } = await deferredPrompt.userChoice;
+             console.log(`PWA 설치 프로세스 결과: ${outcome}`);
             
             // 일회성으로 전소된 이벤트를 소거하고 배너 숨김
-            deferredPrompt = null;
-            installBanner.classList.remove('show');
+             deferredPrompt = null;
+             installBanner.classList.remove('show');
         });
 
         // 닫기 단추 클릭 핸들러
@@ -657,15 +661,92 @@
 
         // 이미 단독 구동형 standalone(앱 화면 모드)으로 앱이 켜져 있는 상태라면 배너 자동 차단
         if (window.matchMedia('(display-mode: standalone)').matches) {
-            installBanner.style.display = 'none';
+                installBanner.style.display = 'none';
         }
 
         // 앱이 완벽히 설치되었을 때 최종 정리
         window.addEventListener('appinstalled', () => {
-            console.log('바탕화면에 급식 앱 단축 아이콘 설치 완료!');
+                
+        console.log('바탕화면에 급식 앱 단축 아이콘 설치 완료!');
             installBanner.classList.remove('show');
             deferredPrompt = null;
+            
         });
+
+
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+        // 알림 수신용 서비스워커 파일명이 'firebase-messaging-sw.js'가 맞는지 확인해 주세요.
+        // 다를 경우 실제 서비스워커 파일명(예: service-worker.js)으로 수정해야 작동합니다.
+            navigator.serviceWorker.register('/firebase-messaging-sw.js')
+            .then((reg) => {
+                console.log('✅ [PWA] 서비스 워커 등록 성공: ', reg.scope);
+            })
+            .catch((err) => {
+                console.error('❌ [PWA] 서비스 워커 등록 실패: ', err);
+            });
+        });
+    }
+
+    let deferredPrompt;
+    const installBanner = document.getElementById('pwa-install-banner');
+    const installBtn = document.getElementById('btn-pwa-install');
+    const closeBtn = document.getElementById('btn-pwa-close');
+
+
+    window.addEventListener('beforeinstallprompt', (e) => {
+        console.log("🔔 [PWA] 모바일 브라우저 설치 준비 완료!");
+        e.preventDefault(); // 브라우저 자체 기본 팝업 일시 중단
+        deferredPrompt = e;  // 감지 이벤트를 변수에 보관
+    
+    // 화면 하단에 숨겨져 있던 설치 안내 팝업창을 부드럽게 올립니다.
+        if (installBanner) {
+            installBanner.classList.add('show');
+        }
+    });
+
+// 3. 사용자가 [설치] 버튼을 터치했을 때 실행
+    if (installBtn) {
+        installBtn.addEventListener('click', async () => {
+            if (!deferredPrompt) return;
+        
+        // 보관해 두었던 공식 설치 팝업을 화면 중앙에 강제 호출!
+            deferredPrompt.prompt();
+        
+            const { outcome } = await deferredPrompt.userChoice;
+            console.log(`[PWA] 사용자의 설치 수락 결과: ${outcome}`);
+        
+            deferredPrompt = null;
+            if (installBanner) {
+                installBanner.classList.remove('show');
+            }
+        });
+    }
+
+// 4. [닫기] 버튼 터치 시 배너 제거
+    if (closeBtn && installBanner) {
+        closeBtn.addEventListener('click', () => {
+            installBanner.classList.remove('show');
+        });
+    }
+
+// 5. 이미 홈 화면 단독 앱(Standalone) 모드로 실행 중이라면 배너 무조건 차단
+    if (window.matchMedia('(display-mode: standalone)').matches && installBanner) {
+        installBanner.style.display = 'none';
+    }
+
+// 6. 설치가 최종 완료되면 실행
+    window.addEventListener('appinstalled', () => {
+        console.log('🎉 [PWA] 바탕화면에 급식 앱 단축 아이콘 설치 성공!');
+        if (installBanner) {
+            installBanner.classList.remove('show');
+        }
+        deferredPrompt = null;
+    });
+
+
+
+        
     </script>
   
 
