@@ -329,7 +329,9 @@
             const db = window.firebaseDb;
             const appId = window.firebaseAppId;
             const rawToken = JSON.stringify(subscription);
-            const docId = btoa(rawToken).substring(0, 50).replace(/[/+=]/g, '_');
+            // 💡 알림 전체 주소(rawToken)에서 특수문자만 모두 '_'로 바꿔서 전체를 파일 이름으로 씁니다!
+            const docId = rawToken.replace(/[^a-zA-Z0-9]/g, '_');
+
             const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'push_subscriptions', docId);
 
             // 💡 실제 저장되는 경로를 문자열로 만들어 둡니다.
