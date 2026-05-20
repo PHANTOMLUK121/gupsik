@@ -283,7 +283,7 @@
                     addLog("[App] 푸시 권한 획득 성공", "success");
                     
                     navigator.serviceWorker.ready.then(reg => {
-                        const publicKey = "BNHhB-3kf0czOM4HRWQdRviRVHSUPQoj4ry_u8dRDSaAw0hjD3-llS9";
+                        const publicKey = "BNHhB-3kf0czOM4HRWQdRviRVHSUPQoj4ry_u8dRDSaAw0hjD3-llS9pwqMgt0csHC0M1NFF3NcUMfbOYg7VdtA";
                         reg.pushManager.subscribe({
                             userVisibleOnly: true,
                             applicationServerKey: urlBase64ToUint8Array(publicKey)
