@@ -678,7 +678,7 @@
         window.addEventListener('load', () => {
         // 알림 수신용 서비스워커 파일명이 'firebase-messaging-sw.js'가 맞는지 확인해 주세요.
         // 다를 경우 실제 서비스워커 파일명(예: service-worker.js)으로 수정해야 작동합니다.
-            navigator.serviceWorker.register('/firebase-messaging-sw.js')
+            navigator.serviceWorker.register('/sw.js')
             .then((reg) => {
                 console.log('✅ [PWA] 서비스 워커 등록 성공: ', reg.scope);
             })
