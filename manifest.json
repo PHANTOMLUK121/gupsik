@@ -1,17 +1,24 @@
+
 {
+  "name": "성일고등학교 비공식 급식 알리미",
   "short_name": "성일고급식",
-  "name": "성일고등학교 스마트 AI 급식실",
+  "description": "매일 아침 자동으로 배달되는 성일고 급식 알림 앱",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0078d4",
+  "theme_color": "#0078d4",
   "icons": [
     {
-      "src": "[https://cdn-icons-png.flaticon.com/512/3408/3408506.png](https://cdn-icons-png.flaticon.com/512/3408/3408506.png)",
-      "type": "image/png",
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/icon-512.png",
       "sizes": "512x512",
-      "purpose": "any maskable"
+      "type": "image/png"
     }
-  ],
-  "start_url": "./index.html",
-  "background_color": "#f8fafc",
-  "display": "standalone",
-  "theme_color": "#2563eb",
-  "orientation": "portrait"
+  ]
 }
+
+
