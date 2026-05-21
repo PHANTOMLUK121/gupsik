@@ -88,7 +88,7 @@ async function startPushSystem() {
     body: notiBody,
     data: {
       // 맨 끝에 슬래시(/)를 붙여야 무조건 하위 폴더 경로로 인식하여 잘리지 않습니다.
-      url: "https://phantomluk121.github.io/seongil-high-meal-app/" 
+      url: "https://phantomluk121.github.io/gupsik/" 
     }
   });
 
