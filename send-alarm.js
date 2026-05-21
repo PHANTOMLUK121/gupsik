@@ -1,4 +1,3 @@
-
 const { initializeApp } = require('firebase-admin/app');
 const { getFirestore } = require('firebase-admin/firestore');
 const admin = require('firebase-admin');
@@ -83,7 +82,16 @@ async function startPushSystem() {
 
   console.log(`📡 등록된 ${users.length}개의 스마트폰 기기로 발송을 시작합니다...`);
 
-  const payload = JSON.stringify({ title: notiTitle, body: notiBody });
+  // 💡 [수정 완료] 클릭 시 이동할 PWA 주소 패킷을 명확하게 실어서 보냅니다.
+  const payload = JSON.stringify({ 
+    title: notiTitle, 
+    body: notiBody,
+    data: {
+      // 맨 끝에 슬래시(/)를 붙여야 무조건 하위 폴더 경로로 인식하여 잘리지 않습니다.
+      url: "https://phantomluk121.github.io/seongil-high-meal-app/" 
+    }
+  });
+
   const promises = users.map(user => {
     return webpush.sendNotification(user.subscription, payload)
       .catch(err => {
@@ -98,6 +106,3 @@ async function startPushSystem() {
 }
 
 startPushSystem();
-
-
-
