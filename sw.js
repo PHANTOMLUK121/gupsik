@@ -28,7 +28,7 @@ self.addEventListener('fetch', function(event) {
 });
 
 // 💡 공통으로 사용할 유저님의 정확한 성일고 급식 앱 주소 정의
-const APP_URL = 'https://phantomluk121.github.io/seongil-high-meal-app/';
+const APP_URL = 'https://phantomluk121.github.io/gupsik/';
 
 async function fetchAndShowMealNotification(pushData = null) {
     let notiTitle = "";
